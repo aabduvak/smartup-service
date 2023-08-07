@@ -21,6 +21,7 @@ class Branch(BaseModel):
 class Region(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
     name = models.CharField(max_length=255)
+    smartup_id = models.CharField(max_length=255,null=True, blank=True)
     
     def __str__(self):
         return self.name
@@ -29,7 +30,7 @@ class City(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
     name = models.CharField(max_length=255)
     region = models.ForeignKey(Region, on_delete=models.CASCADE, null=True, blank=True)
-    
+    smartup_id = models.CharField(max_length=255, null=True, blank=True)
     def __str__(self):
         return self.name
 
@@ -37,6 +38,7 @@ class District(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
     name = models.CharField(max_length=255)
     city = models.ForeignKey(City, on_delete=models.CASCADE, null=True, blank=True)
+    smartup_id = models.CharField(max_length=255, null=True, blank=True)
     
     def __str__(self):
         return f'{self.name} | {self.city.name}'
@@ -44,7 +46,7 @@ class District(BaseModel):
 
 class User(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
-    smartup_id = models.CharField(max_length=255, )
+    smartup_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255, )
     phone = models.CharField(max_length=255, null=True, blank=True)
     
