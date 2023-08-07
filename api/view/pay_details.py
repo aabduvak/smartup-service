@@ -10,3 +10,4 @@ class PaymentTypeListView(ListAPIView):
 class CurrencyListView(ListAPIView):
     queryset = Currency.objects.all()
     serializer_class = CurrencySerializer
+
