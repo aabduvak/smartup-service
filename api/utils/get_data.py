@@ -3,7 +3,7 @@ import requests
 
 API_BASE = settings.SMARTUP_URL
 
-def get_data(endpoint, columns: list, session, parent=None, filter=None, limit=100, offset=0):
+def get_data(endpoint: str, columns: list, session: str, limit=100, offset=0, **kwargs):
     url = f'https://{API_BASE}' + endpoint
 
     data = {
@@ -17,13 +17,16 @@ def get_data(endpoint, columns: list, session, parent=None, filter=None, limit=1
         "d": {}
     }
     
-    if parent:
+    if 'parent' in kwargs:
         data["d"] = {
-            "parent_id": parent
+            "parent_id": kwargs['parent']
         }
     
-    if filter:
-        for item in filter:
+    if 'remove_parent' in kwargs and kwargs['remove_parent']:
+        data.pop("d")
+    
+    if 'filter' in kwargs:
+        for item in kwargs['filter']:
             data["p"]["filter"].append(item)
     
     header = {

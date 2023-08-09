@@ -76,34 +76,33 @@ class Deal(BaseModel):
         return f'{self.smartup_id} | {self.customer.name}'
 
 class OrderDetails(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE)
-    deal = models.ForeignKey(Deal, on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='deals')
+    deal = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name='details')
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
 
     def __str__(self) -> str:
         return f'Order for {self.quantity} {self.product.name} in Deal {self.deal.smartup_id}'
 
-class PaymentType(BaseModel):
+class Currency(BaseModel):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4)
     name = models.CharField(max_length=255)
-    smartup_id = models.CharField(max_length=255)
     
     def __str__(self) -> str:
         return self.name
 
-class Currency(BaseModel):
+class PaymentType(BaseModel):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4)
     name = models.CharField(max_length=255)
     smartup_id = models.CharField(max_length=255)
-    
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True)
     def __str__(self) -> str:
         return self.name
 
 class Payment(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
     smartup_id = models.CharField(max_length=255, )
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, )
+    customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
     currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, blank=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     base_amount = models.DecimalField(max_digits=12, decimal_places=2)
