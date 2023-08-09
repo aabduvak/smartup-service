@@ -10,9 +10,9 @@ urlpatterns = [
     path('districts/', region.DistrictListView.as_view(), name='districts'),
     
     # Retrieve data from SmartUp
-    # path('create-regions/', region.CreateRegionsView.as_view()), # never use again
-    # path('create-cities/', region.CreateCitiesView.as_view()), # never use again
-    # path('create-districts/', region.CreateDistrictsView.as_view())
+    path('create-regions/', region.CreateRegionsView.as_view()), # never use again
+    path('create-cities/', region.CreateCitiesView.as_view()), # never use again
+    path('create-districts/', region.CreateDistrictsView.as_view()), # never use again
     
     path('currency/', pay_details.CurrencyListView.as_view(), name='currencies'),
     path('payment-types/', pay_details.PaymentTypeListView.as_view(), name='payment-types')

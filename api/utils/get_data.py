@@ -3,8 +3,8 @@ import requests
 
 API_BASE = settings.SMARTUP_URL
 
-def get_data(endpoint, columns, session, parent=None, filter=None, limit=100, offset=0):
-    url = f'https://{API_BASE}/b/' + endpoint
+def get_data(endpoint, columns: list, session, parent=None, filter=None, limit=100, offset=0):
+    url = f'https://{API_BASE}' + endpoint
 
     data = {
         "p": {
@@ -14,15 +14,18 @@ def get_data(endpoint, columns, session, parent=None, filter=None, limit=100, of
             "offset": offset,
             "limit": limit
         },
+        "d": {}
     }
     
     if parent:
         data["d"] = {
             "parent_id": parent
         }
+    
     if filter:
         for item in filter:
             data["p"]["filter"].append(item)
+    
     header = {
         'Cookie': session,
     }

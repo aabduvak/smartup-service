@@ -6,6 +6,7 @@ from rest_framework.views import APIView
 
 from api.serializer.region import RegionSerializer, CitySerializer, DistrictSerializer
 from api.models import Region, City, District
+from api.utils.get_data import get_data
 
 LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD        
@@ -27,37 +28,17 @@ class DistrictListView(ListAPIView):
 class CreateRegionsView(APIView):
     def get(self, request):
         if 'Sessionid' not in request.headers:
-            return Response(status=400)
+            return Response(status=401)
         
+        columns = [
+            "region_id",
+            "name",
+            "lat_lng"
+        ]
         session = request.headers['Sessionid']
         
-        url = f'https://{API_BASE}/b/anor/mr/region_list+x&table'
-
-        data = {
-            "p": {
-                "column": [
-                    "region_id",
-                    "name",
-                    "lat_lng"
-                ],
-                "filter": [],
-                "sort": [],
-                "offset": 0,
-                "limit": 100
-            },
-            "d": {
-                "parent_id": region.smartup_id
-            }
-        }
-        
-        header = {
-            'Cookie': session,
-        }
-        
-        response = requests.post(url=url, json=data, headers=header)
-        
-        regions = response.json()['data']
-    
+        response = get_data(endpoint='/b/anor/mr/region_list+x&table', session=session, columns=columns)
+        regions = response['data']
         try:    
             for region in regions:
                 if not Region.objects.filter(smartup_id=region[0]).exists():
@@ -82,33 +63,15 @@ class CreateCitiesView(APIView):
         
         regions = Region.objects.all()
         
-        for region in regions:    
-            url = f'https://{API_BASE}/b/anor/mr/region_list+cities&table'
-
-            data = {
-                "p": {
-                    "column": [
-                        "region_id",
-                        "name",
-                        "lat_lng"
-                    ],
-                    "filter": [],
-                    "sort": [],
-                    "offset": 0,
-                    "limit": 100
-                },
-                "d": {
-                    "parent_id": region.smartup_id
-                }
-            }
+        for region in regions:
+            columns = [
+                "region_id",
+                "name",
+                "lat_lng"
+            ]
             
-            header = {
-                'Cookie': session,
-            }
-            
-            response = requests.post(url=url, json=data, headers=header)
-            
-            cities = response.json()['data']
+            response = get_data(endpoint='/b/anor/mr/region_list+cities&table', session=session, columns=columns, parent=region.smartup_id)
+            cities = response['data']
         
             try:    
                 for city in cities:
@@ -136,32 +99,15 @@ class CreateDistrictsView(APIView):
         cities = City.objects.all()
         
         for city in cities:
-            url = f'https://{API_BASE}/b/anor/mr/region_list+towns&table'
-
-            data ={
-                "p": {
-                    "column": [
-                        "region_id",
-                        "name",
-                        "lat_lng"
-                    ],
-                    "filter": [],
-                    "sort": [],
-                    "offset": 0,
-                    "limit": 100
-                },
-                "d": {
-                    "parent_id": city.smartup_id
-                }
-            }
+            columns = [
+                "region_id",
+                "name",
+                "lat_lng"
+            ]
             
-            header = {
-                'Cookie': session,
-            }
+            response = get_data(endpoint='/b/anor/mr/region_list+towns&table', session=session, columns=columns, parent=city.smartup_id)
+            towns = response['data']
             
-            response = requests.post(url=url, json=data, headers=header)
-            towns = response.json()['data']
-            print(towns)
             try:    
                 for town in towns:
                     if not District.objects.filter(smartup_id=town[0]).exists():
