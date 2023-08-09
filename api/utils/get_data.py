@@ -34,4 +34,9 @@ def get_data(endpoint: str, columns: list, session: str, limit=100, offset=0, **
     }
     
     response = requests.post(url=url, json=data, headers=header)
-    return response.json()
+    if response.status_code == 200:
+        return response.json()
+    return None
+
+def get_xml_data():
+    pass

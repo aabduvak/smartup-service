@@ -27,6 +27,8 @@ class CreateCurrencyView(APIView):
         ]
         
         response = get_data(endpoint='/b/anor/mk/currency_list+x&table', session=session, columns=columns)
+        if not response:
+            return Response(status=500)
         currencies = response['data']
        
         try:    
@@ -56,7 +58,10 @@ class CreatePaymentTypeView(APIView):
         ]
         
         response = get_data(endpoint='/b/anor/mkr/payment_type_list+x&table', session=session, columns=columns, remove_parent=True)
+        if not response:
+            return Response(status=500)
         payment_types = response['data']
+        
         try:    
             for data in payment_types:
                 if not PaymentType.objects.filter(smartup_id=data[0]).exists():

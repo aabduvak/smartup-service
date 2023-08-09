@@ -38,6 +38,8 @@ class CreateRegionsView(APIView):
         session = request.headers['Sessionid']
         
         response = get_data(endpoint='/b/anor/mr/region_list+x&table', session=session, columns=columns)
+        if not response:
+            return Response(status=500)
         regions = response['data']
         try:    
             for region in regions:
@@ -71,6 +73,8 @@ class CreateCitiesView(APIView):
             ]
             
             response = get_data(endpoint='/b/anor/mr/region_list+cities&table', session=session, columns=columns, parent=region.smartup_id)
+            if not response:
+                return Response(status=500)
             cities = response['data']
         
             try:    
@@ -106,6 +110,8 @@ class CreateDistrictsView(APIView):
             ]
             
             response = get_data(endpoint='/b/anor/mr/region_list+towns&table', session=session, columns=columns, parent=city.smartup_id)
+            if not response:
+                return Response(status=500)
             towns = response['data']
             
             try:    
