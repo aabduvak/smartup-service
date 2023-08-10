@@ -33,7 +33,6 @@ class UserDetailView(APIView):
 
 class CreateUserView(APIView):    
     def post(self, request):
-        print(request.data)
         if not 'branch' in request.data:
             return Response(status=400)
         
@@ -72,28 +71,33 @@ class CreateUserView(APIView):
             customer_data = []
             for customer in customers:
                 name = customer.find("ПолноеНазваниеКонтрагента").text
-                phone = customer.find("КонтактыКонтрагент/ОсновнойТелефон").text
+                try:
+                    phone = customer.find("КонтактыКонтрагент/ОсновнойТелефон").text
+                except:
+                    phone = None
                 customer_id = customer.find("ИдКонтрагент").text
                 district = customer.find("Район").text
-
+                address = customer.find("ОсновнойАдрес").text
+                
                 customer_info = {
                     "name": name,
                     "phone": phone,
                     "id": customer_id,
-                    "district": district
+                    "district": district,
+                    "address": address,
                 }
                 customer_data.append(customer_info)
                 
             for customer in customer_data:
                 if not User.objects.filter(smartup_id=customer['id']).exists():
-                    
                     phone = customer['phone']
-                    if not validate_phone_number(phone):
+                    if phone and not validate_phone_number(phone):
                         phone = format_phone_number(phone)
                     user = User.objects.create(
                         smartup_id=customer['id'],
                         name=customer['name'],
-                        phone=phone,  
+                        phone=phone,
+                        address=address
                     )
                     if customer['district'] and District.objects.filter(name=customer['district']):
                         district = District.objects.filter(name=customer['district']).first()
@@ -104,4 +108,4 @@ class CreateUserView(APIView):
             user_serializer = UserSerializer(users, many=True)
             return Response(data=user_serializer.data)
         except:
-            return Response(status=400)
+            return Response(status=500)
