@@ -19,4 +19,5 @@ urlpatterns = [
     path('get/currency/', pay_details.CurrencyListView.as_view(), name='currencies'),
     path('get/payment-types/', pay_details.PaymentTypeListView.as_view(), name='payment-types'),
     path('get/customers/', customer.UserListView.as_view(), name='customers'),
+    path('get/customers/<str:smartup_id>/', customer.UserDetailView.as_view(), name='customer-detail'),
 ]
