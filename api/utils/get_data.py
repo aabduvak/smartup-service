@@ -3,7 +3,7 @@ import requests
 
 API_BASE = settings.SMARTUP_URL
 
-def get_data(endpoint: str, columns: list, session: str, limit=100, offset=0, **kwargs):
+def get_data(endpoint: str, columns, session: str, limit=100, offset=0, **kwargs):
     url = f'https://{API_BASE}' + endpoint
 
     data = {
@@ -26,13 +26,12 @@ def get_data(endpoint: str, columns: list, session: str, limit=100, offset=0, **
         data.pop("d")
     
     if 'filter' in kwargs:
-        for item in kwargs['filter']:
-            data["p"]["filter"].append(item)
+        data["p"]["filter"] = kwargs['filter']
+        data["d"]["is_filial"] = "N"
     
     header = {
         'Cookie': session,
     }
-    
     response = requests.post(url=url, json=data, headers=header)
     if response.status_code == 200:
         return response.json()

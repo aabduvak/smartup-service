@@ -1,9 +1,9 @@
 from django.urls import path
 
-from api.view import region, pay_details, auth, customer
+from api.view import region, pay_details, auth, customer, payment
 
 urlpatterns = [
-    path('auth/login/', auth.AuthView.as_view()),
+    path('auth/login/', auth.AuthView.as_view(), name='login'),
     
     # Retrieve data from SmartUp
     path('create/regions/', region.CreateRegionsView.as_view()), # never use again
@@ -20,4 +20,6 @@ urlpatterns = [
     path('get/payment-types/', pay_details.PaymentTypeListView.as_view(), name='payment-types'),
     path('get/customers/', customer.UserListView.as_view(), name='customers'),
     path('get/customers/<str:smartup_id>/', customer.UserDetailView.as_view(), name='customer-detail'),
+    path('get/payments/', payment.PaymentListView.as_view(), name='payment-list'),
+    path('get/payments/<str:smartup_id>/', payment.PaymentDetailView.as_view(), name='payment-detail'),
 ]

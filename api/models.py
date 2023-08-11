@@ -103,9 +103,10 @@ class Payment(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
     smartup_id = models.CharField(max_length=255, )
     customer = models.ForeignKey(User, on_delete=models.CASCADE, related_name='payments')
-    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, blank=True)
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, null=True)
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     base_amount = models.DecimalField(max_digits=12, decimal_places=2)
-    
+    branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
+    date_of_payment = models.DateField(auto_now=True)
     def __str__(self) -> str:
         return 
