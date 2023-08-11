@@ -1,5 +1,5 @@
 from rest_framework.serializers import ModelSerializer
-from api.models import Payment, User, PaymentType
+from api.models import Payment
 
 class PaymentSerializer(ModelSerializer):
     class Meta:

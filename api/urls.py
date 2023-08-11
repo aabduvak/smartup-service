@@ -10,8 +10,9 @@ urlpatterns = [
     path('create/cities/', region.CreateCitiesView.as_view()), # never use again
     path('create/districts/', region.CreateDistrictsView.as_view()), # never use again
     path('create/currencies/', pay_details.CreateCurrencyView.as_view()),
-    path('create/payments/', pay_details.CreatePaymentTypeView.as_view()),
+    path('create/payment-types/', pay_details.CreatePaymentTypeView.as_view()),
     path('create/customers/', customer.CreateUserView.as_view()), # never use again
+    path('create/payments/', payment.CreatePaymentView.as_view()),
     
     path('get/regions/', region.RegionListView.as_view(), name='regions'),
     path('get/cities/', region.CityListView.as_view(), name='cities'),

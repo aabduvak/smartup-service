@@ -1,9 +1,8 @@
-import requests
-from django.urls import reverse
-from django.conf import settings
+from api.models import User, District
 
 from .get_data import get_data
 from .get_token import obtain_token
+from .phone import validate_phone_number, format_phone_number
 
 def create_customer(id: str):
     session = obtain_token()
@@ -25,5 +24,28 @@ def create_customer(id: str):
         id
     ]
    
-    customer = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, session=session, filter=filter)
-    return customer
+    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, session=session, filter=filter)
+    
+    if not data:
+        return None
+    
+    customer = data['data'][0]
+    
+    if User.objects.filter(smartup_id=customer[0]).exists():
+        return User.objects.get(smartup_id=customer[0])
+    
+    phone = customer[2]
+    if not validate_phone_number(phone):
+        phone = format_phone_number(phone)
+    
+    user = User.objects.create(
+        smartup_id=customer[0],
+        name=customer[1],
+        phone=phone,
+        address=customer[4]
+    )
+    
+    if District.objects.filter(name=customer[3]).exists():
+        user.district = District.objects.filter(name=customer[3]).first()
+        user.save()
+    return user

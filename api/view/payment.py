@@ -6,9 +6,12 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from django.conf import settings
+from decimal import Decimal
+from datetime import datetime
 
 from api.serializer.payment import PaymentSerializer
-from api.models import Payment, Branch
+from api.models import Payment, Branch, User, PaymentType
+from api.utils.customer import create_customer
 
 LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD        
@@ -78,54 +81,45 @@ class CreatePaymentView(PaymentDetailView):
         if response.status_code != 200:
             return Response(status=response.status_code)
         
-        try:
-            parser = etree.XMLParser(recover=True)
-            root = etree.fromstring(response.content, parser=parser)
+        parser = etree.XMLParser(recover=True)
+        root = etree.fromstring(response.content, parser=parser)
 
-            payments = root.xpath("//Оплата")
+        payments = root.xpath("//Оплата")
+        
+        for payment in payments:
+            info = {
+                "customer_id": payment.find("ИдКонтрагента").text,
+                "payment_id": payment.find("ИдОплаты").text,
+                "payment_type_id": payment.find("ИдТипаОплаты").text,
+                "amount": payment.find("Сумма").text,
+                "base_amount": payment.find("Базовая").text,
+                "date_of_payment": payment.find("ДатаОплаты").text,
+            }
+
+            if Payment.objects.filter(smartup_id=info['payment_id']).exists():
+                continue
             
-            payments_data = []
-            for payment in payments:
-                customer_id = payment.find("ИдКонтрагента").text
-                payment_id = payment.find("ИдОплаты").text
-                payment_type_id = payment.find("ИдТипаОплаты").text
-                
-                # name = payment.find("
-                try:
-                    phone = customer.find("КонтактыКонтрагент/ОсновнойТелефон").text
-                except:
-                    phone = None
-                customer_id = customer.find("ИдКонтрагент").text
-                district = customer.find("Район").text
-                address = customer.find("ОсновнойАдрес").text
-                
-                customer_info = {
-                    "name": name,
-                    "phone": phone,
-                    "id": customer_id,
-                    "district": district,
-                    "address": address,
-                }
-                customer_data.append(customer_info)
-                
-            for customer in customer_data:
-                if not User.objects.filter(smartup_id=customer['id']).exists():
-                    phone = customer['phone']
-                    if phone and not validate_phone_number(phone):
-                        phone = format_phone_number(phone)
-                    user = User.objects.create(
-                        smartup_id=customer['id'],
-                        name=customer['name'],
-                        phone=phone,
-                        address=address
-                    )
-                    if customer['district'] and District.objects.filter(name=customer['district']):
-                        district = District.objects.filter(name=customer['district']).first()
-                        user.district = district
-                        user.save()
+            if not User.objects.filter(smartup_id=info['customer_id']).exists():
+                create_customer(info['customer_id'])
             
-            users = User.objects.all()
-            user_serializer = UserSerializer(users, many=True)
-            return Response(data=user_serializer.data)
-        except:
-            return Response(status=500)
+            user = User.objects.get(smartup_id=info['customer_id'])
+            payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
+            amount =  Decimal(info['amount'])
+            base_amount = Decimal(info['base_amount'])
+            date_of_payment = datetime.strptime(info['date_of_payment'], '%d.%m.%Y').date()
+            
+            payment = Payment.objects.create(
+                smartup_id=info['payment_id'],
+                customer=user,
+                payment_type=payment_type,
+                amount=amount,
+                base_amount=base_amount,
+                date_of_payment=date_of_payment.strftime('%Y-%m-%d'),
+                branch=branch,
+            )
+        
+        payments = Payment.objects.all()
+        serializer = PaymentSerializer(payments, many=True) 
+        return Response(data=serializer.data)
+        # except:
+        #     return Response(status=500)
