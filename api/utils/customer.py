@@ -26,7 +26,7 @@ def create_customer(id: str):
    
     data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, session=session, filter=filter)
     
-    if not data:
+    if data['count'] <= 0:
         return None
     
     customer = data['data'][0]
