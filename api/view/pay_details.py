@@ -15,7 +15,7 @@ class CurrencyListView(ListAPIView):
     serializer_class = CurrencySerializer
 
 class CreateCurrencyView(APIView):
-    def get(self, request):
+    def post(self, request):
         if 'Sessionid' not in request.headers:
             return Response(status=401)
         
@@ -46,7 +46,7 @@ class CreateCurrencyView(APIView):
         return Response(return_data, status=200)
 
 class CreatePaymentTypeView(APIView):
-    def get(self, request):
+    def post(self, request):
         if 'Sessionid' not in request.headers:
             return Response(status=401)
         

@@ -48,7 +48,6 @@ class PaymentListView(ListAPIView):
         
         return queryset
 
-
 class PaymentDetailView(APIView):
     def get(self, request, smartup_id):
         if not smartup_id:

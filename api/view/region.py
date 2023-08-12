@@ -26,7 +26,7 @@ class DistrictListView(ListAPIView):
 
 
 class CreateRegionsView(APIView):
-    def get(self, request):
+    def post(self, request):
         if 'Sessionid' not in request.headers:
             return Response(status=401)
         
@@ -57,7 +57,7 @@ class CreateRegionsView(APIView):
         return Response(return_data, status=200)
 
 class CreateCitiesView(APIView):
-    def get(self, request):
+    def post(self, request):
         if 'Sessionid' not in request.headers:
             return Response(status=400)
         
@@ -94,7 +94,7 @@ class CreateCitiesView(APIView):
         return Response(return_data, status=200)
 
 class CreateDistrictsView(APIView):
-    def get(self, request):
+    def post(self, request):
         if 'Sessionid' not in request.headers:
             return Response(status=400)
         
