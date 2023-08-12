@@ -61,7 +61,7 @@ class PaymentDetailView(APIView):
         serializer = PaymentSerializer(payment)
         return Response(serializer.data)
 
-class CreatePaymentView(PaymentDetailView):
+class CreatePaymentView(APIView):
     def post(self, request):
         if not 'branch' in request.data:
             return Response(status=400)
