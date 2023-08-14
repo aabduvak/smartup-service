@@ -4,7 +4,10 @@ from rest_framework.response import Response
 
 from api.models import PaymentType, Currency
 from api.serializer.pay_details import PaymentTypeSerializer, CurrencySerializer
+
 from api.utils.get_data import get_data
+from api.utils.get_token import obtain_token
+from api.utils.payment_type import create_payment_type
 
 class PaymentTypeListView(ListAPIView):
     queryset = PaymentType.objects.all()
@@ -41,41 +44,16 @@ class CreateCurrencyView(APIView):
             return Response(status=500)
     
         currencies = Currency.objects.all()
-        return_data = [{"id": currency.id, "name": currency.name, 'created_at': currency.created_at} for currency in currencies]
+        serializer = CurrencySerializer(currencies, many=True)
         
-        return Response(return_data, status=200)
+        return Response(serializer.data, status=200)
 
 class CreatePaymentTypeView(APIView):
     def post(self, request):
-        if 'Sessionid' not in request.headers:
-            return Response(status=401)
+
+        if create_payment_type():
+            payment_types = PaymentType.objects.all()
+            serializer = PaymentTypeSerializer(payment_types, many=True)
+            return Response(serializer.data)
+        return Response(status=500)
         
-        session = request.headers['Sessionid']
-        columns = [
-            "payment_type_id",
-            "name",
-            "currency_name"
-        ]
-        
-        response = get_data(endpoint='/b/anor/mkr/payment_type_list+x&table', session=session, columns=columns, remove_parent=True)
-        if not response:
-            return Response(status=500)
-        payment_types = response['data']
-        
-        try:    
-            for data in payment_types:
-                if not PaymentType.objects.filter(smartup_id=data[0]).exists():
-                    currency = Currency.objects.get(name=data[2])
-                    
-                    PaymentType.objects.create(
-                        smartup_id=data[0],
-                        name=data[1],
-                        currency=currency
-                    )
-        except:
-            return Response(status=500)
-    
-        payment_types = PaymentType.objects.all()
-        return_data = [{"id": data.id, "smartup_id": data.smartup_id, "name": data.name, 'created_at': data.created_at} for data in payment_types]
-        
-        return Response(return_data, status=200)

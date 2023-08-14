@@ -66,24 +66,6 @@ class Product(BaseModel):
     def __str__(self) -> str:
         return f'{self.name} | {self.smartup_id}'
 
-class Deal(BaseModel):
-    id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
-    smartup_id = models.CharField(max_length=255, )
-    total = models.CharField(max_length=255, )
-    customer = models.ForeignKey(User, on_delete=models.CASCADE, )
-    
-    def __str__(self) -> str:
-        return f'{self.smartup_id} | {self.customer.name}'
-
-class OrderDetails(BaseModel):
-    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='deals')
-    deal = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name='details')
-    quantity = models.PositiveIntegerField(default=1)
-    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
-
-    def __str__(self) -> str:
-        return f'Order for {self.quantity} {self.product.name} in Deal {self.deal.smartup_id}'
-
 class Currency(BaseModel):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4)
     name = models.CharField(max_length=255)
@@ -110,3 +92,24 @@ class Payment(BaseModel):
     date_of_payment = models.DateField(auto_now=True)
     def __str__(self) -> str:
         return 
+
+class Deal(BaseModel):
+    id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
+    smartup_id = models.CharField(max_length=255, )
+    total = models.DecimalField(max_digits=12, decimal_places=2)
+    customer = models.ForeignKey(User, on_delete=models.CASCADE)
+    date_of_order = models.DateField(auto_now=True)
+    date_of_shipment = models.DateField(auto_now=True)
+    payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, null=True, blank=True)
+    
+    def __str__(self) -> str:
+        return f'{self.smartup_id} | {self.customer.name}'
+
+class OrderDetails(BaseModel):
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='deals')
+    deal = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name='details')
+    quantity = models.PositiveIntegerField(default=1)
+    unit_price = models.DecimalField(max_digits=12, decimal_places=2)
+
+    def __str__(self) -> str:
+        return f'Order for {self.quantity} {self.product.name} in Deal {self.deal.smartup_id}'
