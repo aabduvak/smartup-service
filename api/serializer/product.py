@@ -8,9 +8,7 @@ class ProductSerializer(ModelSerializer):
         
     def to_representation(self, instance):
         representation = super().to_representation(instance)
-        if representation['currency'] and instance.currency:
-            representation['currency'] = instance.currency.name
-        
+       
         if representation['brand'] and instance.brand:
             representation['brand'] = instance.brand.name
         

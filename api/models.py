@@ -70,7 +70,7 @@ class Product(BaseModel):
     name = models.CharField(max_length=255, )
     code = models.CharField(max_length=255, )
     fiskal_code = models.CharField(max_length=255, null=True, blank=True)
-    brand = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
     barcode = models.CharField(max_length=255, null=True, blank=True)
     def __str__(self) -> str:
         return f'{self.name} | {self.smartup_id}'

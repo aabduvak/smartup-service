@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.view import region, pay_details, auth, customer, payment
+from api.view import region, pay_details, auth, customer, payment, product
 
 urlpatterns = [
     path('auth/login/', auth.AuthView.as_view(), name='login'),
@@ -13,6 +13,7 @@ urlpatterns = [
     path('create/payment-types/', pay_details.CreatePaymentTypeView.as_view()),
     path('create/customers/', customer.CreateUserView.as_view()), # never use again
     path('create/payments/', payment.CreatePaymentView.as_view()),
+    path('create/products/', product.CreateProductView.as_view()),
     
     path('get/regions/', region.RegionListView.as_view(), name='regions'),
     path('get/cities/', region.CityListView.as_view(), name='cities'),
