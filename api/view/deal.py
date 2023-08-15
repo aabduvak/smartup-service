@@ -89,6 +89,8 @@ class CreateDealView(APIView):
                 if not User.objects.filter(smartup_id=info['customer_id']).exists():
                     create_customer(info['customer_id'])
                 
+                product_elements = deal.findall("//Строки")
+                
                 user = User.objects.get(smartup_id=info['customer_id'])
                 payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
                 amount =  Decimal(info['amount'])

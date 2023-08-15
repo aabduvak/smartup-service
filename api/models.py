@@ -56,13 +56,22 @@ class User(BaseModel):
     def __str__(self) -> str:
         return f'{self.smartup_id} | {self.name}'
 
+class Brand(BaseModel):
+    id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
+    name = models.CharField(max_length=255)
+    smartup_id = models.CharField(max_length=255)
+    
+    def __str__(self) -> str:
+        return self.name
+
 class Product(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
     smartup_id = models.CharField(max_length=255)
     name = models.CharField(max_length=255, )
     code = models.CharField(max_length=255, )
-    price = models.DecimalField(max_digits=12, decimal_places=2)
-    
+    fiskal_code = models.CharField(max_length=255, null=True, blank=True)
+    brand = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
+    barcode = models.CharField(max_length=255, null=True, blank=True)
     def __str__(self) -> str:
         return f'{self.name} | {self.smartup_id}'
 
@@ -110,6 +119,6 @@ class OrderDetails(BaseModel):
     deal = models.ForeignKey(Deal, on_delete=models.CASCADE, related_name='details')
     quantity = models.PositiveIntegerField(default=1)
     unit_price = models.DecimalField(max_digits=12, decimal_places=2)
-
+    currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, blank=True)
     def __str__(self) -> str:
         return f'Order for {self.quantity} {self.product.name} in Deal {self.deal.smartup_id}'
