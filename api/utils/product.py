@@ -60,8 +60,10 @@ def create_product(code: str):
     if not Brand.objects.filter(name=data[5]).exists():
         create_brands()
     
-    brand = Brand.objects.get(name=data[5])
-    product.brand = brand
+    if Brand.objects.filter(name=data[5]).exists():
+        brand = Brand.objects.get(name=data[5])
+        product.brand = brand
+    
     product.save()    
     return product
     

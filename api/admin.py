@@ -4,7 +4,6 @@ from django.contrib import admin
 from api.models import *
 
 admin.site.register(User)
-admin.site.register(Product)
 admin.site.register(Deal)
 admin.site.register(Payment)
 admin.site.register(Branch)
@@ -15,3 +14,19 @@ admin.site.register(OrderDetails)
 admin.site.register(PaymentType)
 admin.site.register(Currency)
 admin.site.register(Brand)
+
+@admin.register(Product)
+class ProductAdmin(admin.ModelAdmin):
+
+    
+    list_display = (
+        'name',
+        'code',
+        'brand'
+    )
+    
+    list_filter = ('brand',)
+    
+    sortable_by = ('code', 'brand')
+    
+    search_fields = ('code', 'name')

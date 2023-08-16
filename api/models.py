@@ -73,7 +73,7 @@ class Product(BaseModel):
     brand = models.ForeignKey(Brand, on_delete=models.SET_NULL, null=True, blank=True, related_name="products")
     barcode = models.CharField(max_length=255, null=True, blank=True)
     def __str__(self) -> str:
-        return f'{self.name} | {self.smartup_id}'
+        return f'{self.name} | {self.code}'
 
 class Currency(BaseModel):
     id = models.UUIDField(primary_key=True, unique=True, default=uuid.uuid4)

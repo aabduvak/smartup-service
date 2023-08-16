@@ -24,4 +24,6 @@ urlpatterns = [
     path('get/customers/<str:smartup_id>/', customer.UserDetailView.as_view(), name='customer-detail'),
     path('get/payments/', payment.PaymentListView.as_view(), name='payment-list'),
     path('get/payments/<str:smartup_id>/', payment.PaymentDetailView.as_view(), name='payment-detail'),
+    path('get/products/', product.ProductListView.as_view(), name='products'),
+    path('get/products/<str:code>/', product.ProductDetailView.as_view(), name='product-details')
 ]
