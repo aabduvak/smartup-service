@@ -28,16 +28,24 @@ def create_deal_details(data):
     
     
     prod = Product.objects.get(code=product['code'])
-    currency = data['deal'].payment_type.currency
+    quantity = int(product['quantity'])
+    unit_price = Decimal(product['price'])
     
-    OrderDetails.objects.create(
+    data['deal'].total += quantity * unit_price
+    data['deal'].save()
+    
+    detail = OrderDetails.objects.create(
         product=prod,
         deal=data['deal'],
-        quantity=int(product['quantity']),
-        unit_price=Decimal(product['price']),
-        currency=currency
+        quantity=quantity,
+        unit_price=unit_price,
     )
-        
+    
+    if data['deal'].payment_type:
+        currency = data['deal'].payment_type.currency
+        detail.currency = currency
+        detail.save()
+
     return True
 
 class DealListView(ListAPIView):
@@ -107,63 +115,68 @@ class CreateDealView(APIView):
         if response.status_code != 200:
             return Response(status=response.status_code)
         
-        parser = etree.XMLParser(recover=True)
-        root = etree.fromstring(response.content, parser=parser)
+        try:
+            parser = etree.XMLParser(recover=True)
+            root = etree.fromstring(response.content, parser=parser)
 
-        deals = root.xpath("//Сделка")
-        
-        for deal in deals:
-            info = {
-                "deal_id": deal.find("СделкаИд").text,
-                "customer_id": deal.find("КонтрагентИд").text,
-                "payment_type_id": deal.find(".//ТипОплатыИд").text,
-                "amount": deal.find(".//Сумма").text,
-                "date_of_order": deal.find("ДатаСделки").text,
-                "date_of_shipment": deal.find("ДатаОтгрузки").text,
-            }
+            deals = root.xpath("//Сделка")
             
-            if Deal.objects.filter(smartup_id=info['deal_id']).exists():
-                continue
-
-            if not PaymentType.objects.filter(smartup_id=info['payment_type_id']).exists():
-                create_payment_type()
-            
-            if not User.objects.filter(smartup_id=info['customer_id']).exists():
-                create_customer(info['customer_id'])
-            
-            user = User.objects.get(smartup_id=info['customer_id'])
-            payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
-            amount =  Decimal(info['amount'])
-            
-            date_of_shipment = datetime.strptime(info['date_of_shipment'], '%d.%m.%Y').date()
-            date_of_order = datetime.strptime(info['date_of_order'], '%d.%m.%Y %H:%M:%S').date()
-            
-            new_deal = Deal.objects.create(
-                smartup_id=info['deal_id'],
-                customer=user,
-                payment_type=payment_type,
-                date_of_order=date_of_order,
-                date_of_shipment=date_of_shipment,
-                total=amount,
-            )
-
-            product_elements = deal.findall("Строки")
-            for product in product_elements:
-                data = {
-                    "product": {},
-                    "deal": new_deal
+            for deal in deals:
+                info = {
+                    "deal_id": deal.find("СделкаИд").text,
+                    "customer_id": deal.find("КонтрагентИд").text,
+                    "date_of_order": deal.find("ДатаСделки").text,
+                    "date_of_shipment": deal.find("ДатаОтгрузки").text,
                 }
                 
-                data['product']['code'] = product.find('НоменклатураКод').text
-                data['product']['price'] = product.find('Цена').text
-                data['product']['quantity'] = product.find('ПроданоКоличество').text
-                data['product']['currency'] = product.find('ВалютаИд').text
+                if deal.find(".//ТипОплатыИд") is not None:
+                    info["payment_type_id"] = deal.find(".//ТипОплатыИд").text
                 
-                if not create_deal_details(data):
+                if Deal.objects.filter(smartup_id=info['deal_id']).exists():
                     continue
-        
-        deals = Deal.objects.all()
-        serializer = DealSerializer(deals, many=True) 
-        return Response(data=serializer.data)
-        # except:
-        #     return Response(status=500)
+
+                if not User.objects.filter(smartup_id=info['customer_id']).exists():
+                    create_customer(info['customer_id'])
+                
+                user = User.objects.get(smartup_id=info['customer_id'])
+                
+                date_of_shipment = datetime.strptime(info['date_of_shipment'], '%d.%m.%Y').date()
+                date_of_order = datetime.strptime(info['date_of_order'], '%d.%m.%Y %H:%M:%S').date()
+                
+                new_deal = Deal.objects.create(
+                    smartup_id=info['deal_id'],
+                    customer=user,
+                    date_of_order=date_of_order,
+                    date_of_shipment=date_of_shipment,
+                    total=0,
+                )
+                
+                if 'payment_type_id' in info:
+                    if not PaymentType.objects.filter(smartup_id=info['payment_type_id']).exists():
+                        create_payment_type()
+
+                    payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
+                    new_deal.payment_type = payment_type
+                    new_deal.save()
+                
+                product_elements = deal.findall("Строки")
+                for product in product_elements:
+                    data = {
+                        "product": {},
+                        "deal": new_deal
+                    }
+                    
+                    data['product']['code'] = product.find('НоменклатураКод').text
+                    data['product']['price'] = product.find('Цена').text
+                    data['product']['quantity'] = product.find('ПроданоКоличество').text
+                    data['product']['currency'] = product.find('ВалютаИд').text
+                    
+                    if not create_deal_details(data):
+                        continue
+            
+            date = datetime.strptime(date, '%d.%m.%Y').date()
+            deals = Deal.objects.filter(date_of_shipment=date)
+            serializer = DealSerializer(deals, many=True) 
+            return Response(data=serializer.data)
+        except:
+            return Response(status=500)

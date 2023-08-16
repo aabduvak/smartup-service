@@ -14,5 +14,6 @@ class DealSerializer(ModelSerializer):
             representation['customer'] = instance.customer.name
         if representation['payment_type'] and instance.payment_type:
             representation['payment_type'] = instance.payment_type.name
-        representation['currency'] = instance.payment_type.currency.name
+        if representation['payment_type'] and instance.payment_type:
+            representation['currency'] = instance.payment_type.currency.name
         return representation
