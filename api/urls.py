@@ -1,6 +1,6 @@
 from django.urls import path
 
-from api.view import region, pay_details, auth, customer, payment, product
+from api.view import region, pay_details, auth, customer, payment, product, deal
 
 urlpatterns = [
     path('auth/login/', auth.AuthView.as_view(), name='login'),
@@ -14,6 +14,7 @@ urlpatterns = [
     path('create/customers/', customer.CreateUserView.as_view()), # never use again
     path('create/payments/', payment.CreatePaymentView.as_view()),
     path('create/products/', product.CreateProductView.as_view()),
+    path('create/deals/', deal.CreateDealView.as_view()),
     
     path('get/regions/', region.RegionListView.as_view(), name='regions'),
     path('get/cities/', region.CityListView.as_view(), name='cities'),
@@ -25,5 +26,7 @@ urlpatterns = [
     path('get/payments/', payment.PaymentListView.as_view(), name='payment-list'),
     path('get/payments/<str:smartup_id>/', payment.PaymentDetailView.as_view(), name='payment-detail'),
     path('get/products/', product.ProductListView.as_view(), name='products'),
-    path('get/products/<str:code>/', product.ProductDetailView.as_view(), name='product-details')
+    path('get/products/<str:code>/', product.ProductDetailView.as_view(), name='product-details'),
+    path('get/deals/',deal.DealListView.as_view(), name='deals'),
+    path('get/deals/<str:smartup_id>',deal.DealDetailView.as_view(), name='deals'),
 ]

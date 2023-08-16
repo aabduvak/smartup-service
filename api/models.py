@@ -98,7 +98,7 @@ class Payment(BaseModel):
     amount = models.DecimalField(max_digits=12, decimal_places=2)
     base_amount = models.DecimalField(max_digits=12, decimal_places=2)
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
-    date_of_payment = models.DateField(auto_now=True)
+    date_of_payment = models.DateField()
     def __str__(self) -> str:
         return 
 
@@ -107,8 +107,8 @@ class Deal(BaseModel):
     smartup_id = models.CharField(max_length=255, )
     total = models.DecimalField(max_digits=12, decimal_places=2)
     customer = models.ForeignKey(User, on_delete=models.CASCADE)
-    date_of_order = models.DateField(auto_now=True)
-    date_of_shipment = models.DateField(auto_now=True)
+    date_of_order = models.DateField()
+    date_of_shipment = models.DateField()
     payment_type = models.ForeignKey(PaymentType, on_delete=models.SET_NULL, null=True, blank=True)
     
     def __str__(self) -> str:

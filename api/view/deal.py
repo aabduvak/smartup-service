@@ -7,14 +7,38 @@ from lxml import etree
 from datetime import datetime
 from decimal import Decimal
 
-from api.models import User, Deal, Branch, PaymentType
+from api.models import User, Deal, Branch, PaymentType, Product, OrderDetails
 from api.serializer.deal import DealSerializer
 from api.utils.payment_type import create_payment_type
 from api.utils.customer import create_customer
+from api.utils.product import create_product
 
 API_BASE = settings.SMARTUP_URL
 LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD
+
+def create_deal_details(data):
+    if not data['deal']:
+        return None
+    
+    product = data['product']
+    
+    if not Product.objects.filter(code=product['code']).exists():
+        create_product(product['code'])
+    
+    
+    prod = Product.objects.get(code=product['code'])
+    currency = data['deal'].payment_type.currency
+    
+    OrderDetails.objects.create(
+        product=prod,
+        deal=data['deal'],
+        quantity=int(product['quantity']),
+        unit_price=Decimal(product['price']),
+        currency=currency
+    )
+        
+    return True
 
 class DealListView(ListAPIView):
     serializer_class = DealSerializer
@@ -26,9 +50,26 @@ class DealDetailView(APIView):
             return Response(status=400)
         
         if not Deal.objects.filter(smartup_id=smartup_id).exists():
-            pass
+            return Response(status=404)
         
-        return Response(status=200)
+        deal = Deal.objects.get(smartup_id=smartup_id)
+        details = OrderDetails.objects.filter(deal=deal)
+        serializer = DealSerializer(deal)
+        data = serializer.data
+        products = []
+        for detail in details:
+            product = {
+                "name": detail.product.name,
+                "code": detail.product.code,
+                "brand": detail.product.brand.name,
+                "quantity": detail.quantity,
+                "price": detail.unit_price,
+            }
+            
+            products.append(product)
+
+        data['products'] = products
+        return Response(data)
 
 class CreateDealView(APIView):
     def post(self, request):
@@ -66,48 +107,63 @@ class CreateDealView(APIView):
         if response.status_code != 200:
             return Response(status=response.status_code)
         
-        try:
-            parser = etree.XMLParser(recover=True)
-            root = etree.fromstring(response.content, parser=parser)
+        parser = etree.XMLParser(recover=True)
+        root = etree.fromstring(response.content, parser=parser)
 
-            deals = root.xpath("//Сделка")
+        deals = root.xpath("//Сделка")
+        
+        for deal in deals:
+            info = {
+                "deal_id": deal.find("СделкаИд").text,
+                "customer_id": deal.find("КонтрагентИд").text,
+                "payment_type_id": deal.find(".//ТипОплатыИд").text,
+                "amount": deal.find(".//Сумма").text,
+                "date_of_order": deal.find("ДатаСделки").text,
+                "date_of_shipment": deal.find("ДатаОтгрузки").text,
+            }
             
-            for deal in deals:
-                info = {
-                    "deal_id": deal.find("СделкаИд").text,
-                    "customer_id": deal.find("КонтрагентИд").text,
-                    "payment_type_id": deal.find("ТипОплатыИд").text,
-                    "amount": deal.find("Оплата/Сумма").text,
-                    "date_of_order": deal.find("ДатаСделки").text,
-                    "date_of_shipment": deal.find("ДатаОтгрузки").text,
-                    "products": {}
+            if Deal.objects.filter(smartup_id=info['deal_id']).exists():
+                continue
+
+            if not PaymentType.objects.filter(smartup_id=info['payment_type_id']).exists():
+                create_payment_type()
+            
+            if not User.objects.filter(smartup_id=info['customer_id']).exists():
+                create_customer(info['customer_id'])
+            
+            user = User.objects.get(smartup_id=info['customer_id'])
+            payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
+            amount =  Decimal(info['amount'])
+            
+            date_of_shipment = datetime.strptime(info['date_of_shipment'], '%d.%m.%Y').date()
+            date_of_order = datetime.strptime(info['date_of_order'], '%d.%m.%Y %H:%M:%S').date()
+            
+            new_deal = Deal.objects.create(
+                smartup_id=info['deal_id'],
+                customer=user,
+                payment_type=payment_type,
+                date_of_order=date_of_order,
+                date_of_shipment=date_of_shipment,
+                total=amount,
+            )
+
+            product_elements = deal.findall("Строки")
+            for product in product_elements:
+                data = {
+                    "product": {},
+                    "deal": new_deal
                 }
-
-                if not PaymentType.objects.filter(smartup_id=info['payment_type_id']).exists():
-                    create_payment_type()
                 
-                if not User.objects.filter(smartup_id=info['customer_id']).exists():
-                    create_customer(info['customer_id'])
+                data['product']['code'] = product.find('НоменклатураКод').text
+                data['product']['price'] = product.find('Цена').text
+                data['product']['quantity'] = product.find('ПроданоКоличество').text
+                data['product']['currency'] = product.find('ВалютаИд').text
                 
-                product_elements = deal.findall("//Строки")
-                
-                user = User.objects.get(smartup_id=info['customer_id'])
-                payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
-                amount =  Decimal(info['amount'])
-                date_of_shipment = datetime.strptime(info['date_of_shipment'], '%d.%m.%Y').date()
-                date_of_order = datetime.strptime(info['date_of_order'], '%d.%m.%Y').date()
-                
-                deal = Deal.objects.create(
-                    smartup_id=info['deal_id'],
-                    customer=user,
-                    payment_type=payment_type,
-                    date_of_order=date_of_order,
-                    date_of_payment=date_of_shipment,
-                    total=amount,
-                )
-            
-            payments = Payment.objects.all()
-            serializer = PaymentSerializer(payments, many=True) 
-            return Response(data=serializer.data)
-        except:
-            return Response(status=500)
+                if not create_deal_details(data):
+                    continue
+        
+        deals = Deal.objects.all()
+        serializer = DealSerializer(deals, many=True) 
+        return Response(data=serializer.data)
+        # except:
+        #     return Response(status=500)

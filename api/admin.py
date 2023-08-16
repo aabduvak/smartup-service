@@ -10,7 +10,6 @@ admin.site.register(Branch)
 admin.site.register(District)
 admin.site.register(Region)
 admin.site.register(City)
-admin.site.register(OrderDetails)
 admin.site.register(PaymentType)
 admin.site.register(Currency)
 admin.site.register(Brand)
@@ -30,3 +29,13 @@ class ProductAdmin(admin.ModelAdmin):
     sortable_by = ('code', 'brand')
     
     search_fields = ('code', 'name')
+
+@admin.register(OrderDetails)
+class OrderDetailsAdmin(admin.ModelAdmin):
+
+    
+    list_display = (
+        'product',
+        'deal',
+    )
+    
