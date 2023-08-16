@@ -44,7 +44,12 @@ ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
 SMARTUP_LOGIN = env('SMARTUP_LOGIN')
 SMARTUP_PASSWORD = env('SMARTUP_PASSWORD')
 SMARTUP_URL = env('SMARTUP_URL')
-BRANCH_ID = env('BRANCH_ID')
+BRANCHES_ID = env.list('BRANCHES_ID', default=[])
+
+# Eskiz.uz credentials (SMS Provider)
+ESKIZ_EMAIL = env('ESKIZ_EMAIL')
+ESKIZ_PASSWORD = env('ESKIZ_PASSWORD')
+ESKIZ_URL = env('ESKIZ_URL')
 
 # Application definition
 
