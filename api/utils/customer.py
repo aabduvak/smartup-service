@@ -1,12 +1,9 @@
 from api.models import User, District
 
 from .get_data import get_data
-from .get_token import obtain_token
 from .phone import validate_phone_number, format_phone_number
 
 def create_customer(id: str):
-    session = obtain_token()
-    
     columns = [
         "person_id",
         "name",
@@ -24,7 +21,7 @@ def create_customer(id: str):
         id
     ]
    
-    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, session=session, filter=filter)
+    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, filter=filter)
     
     if data['count'] <= 0:
         return None

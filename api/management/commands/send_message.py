@@ -70,7 +70,7 @@ def send_messages():
             if currency_name.lower() == 'base sum':
                 currency_name = 'UZS'
 
-            message = f'Hurmatli {payment.customer.name}\nOOO "GLAMOUR COSMETICS" korxonasiga amalga oshirgan {payment.amount} {currency_name} miqdoridagi to\'lovingiz qabul qilindi'
+            message = f'Hurmatli {payment.customer.name}\nOOO GLAMOUR COSMETICS korxonasiga amalga oshirgan {payment.amount} {currency_name} miqdoridagi to\'lovingiz qabul qilindi. '
             customer = payment.customer
             
             state = send_message(customer.phone[1:], message, token)

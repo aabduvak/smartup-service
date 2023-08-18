@@ -1,13 +1,10 @@
 from api.models import Product, Brand
 
 from .get_data import get_data
-from .get_token import obtain_token
 
 def create_brands():
-    session = obtain_token()
-    
     columns = ["producer_id","name","region_name"]
-    response = get_data('/b/anor/mr/producer_list+x&table', columns=columns, session=session)
+    response = get_data('/b/anor/mr/producer_list+x&table', columns=columns)
    
     if response['count'] <= 0:
         return None
@@ -22,9 +19,7 @@ def create_brands():
     return True
     
 
-def create_product(code: str):
-    session = obtain_token()
-    
+def create_product(code: str):    
     columns = [
         "product_id",
         "code",
@@ -40,7 +35,7 @@ def create_product(code: str):
         f"%{code}%"
     ]
   
-    response = get_data('/b/ref/product_list+x&table', columns=columns, session=session, filter=filter)
+    response = get_data('/b/ref/product_list+x&table', columns=columns, filter=filter)
     
     if response['count'] <= 0:
         return None

@@ -6,7 +6,6 @@ from api.models import PaymentType, Currency
 from api.serializer.pay_details import PaymentTypeSerializer, CurrencySerializer
 
 from api.utils.get_data import get_data
-from api.utils.get_token import obtain_token
 from api.utils.payment_type import create_payment_type
 
 class PaymentTypeListView(ListAPIView):
@@ -19,17 +18,13 @@ class CurrencyListView(ListAPIView):
 
 class CreateCurrencyView(APIView):
     def post(self, request):
-        if 'Sessionid' not in request.headers:
-            return Response(status=401)
-        
-        session = request.headers['Sessionid']
         columns = [
             "name",
             "state_name",
             "currency_id"
         ]
         
-        response = get_data(endpoint='/b/anor/mk/currency_list+x&table', session=session, columns=columns)
+        response = get_data(endpoint='/b/anor/mk/currency_list+x&table', columns=columns)
         if not response:
             return Response(status=500)
         currencies = response['data']

@@ -1,10 +1,8 @@
 from api.models import PaymentType, Currency
 
 from .get_data import get_data
-from .get_token import obtain_token
 
 def create_payment_type():
-    session = obtain_token()
 
     columns = [
         "payment_type_id",
@@ -12,7 +10,7 @@ def create_payment_type():
         "currency_name"
     ]
     
-    response = get_data(endpoint='/b/anor/mkr/payment_type_list+x&table', session=session, columns=columns, remove_parent=True, filter=filter)
+    response = get_data(endpoint='/b/anor/mkr/payment_type_list+x&table', columns=columns, remove_parent=True, filter=filter)
     if response['count'] <= 0:
         return None
     

@@ -1,11 +1,17 @@
 from django.conf import settings
 import requests
 
+from .get_token import obtain_token
+
 LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD        
 API_BASE = settings.SMARTUP_URL
 
-def get_data(endpoint: str, columns, session: str, limit=100, offset=0, **kwargs):
+def get_data(endpoint: str, columns, limit=100, offset=0, **kwargs):
+    session = obtain_token()
+    if not session:
+        return None
+    
     url = f'https://{API_BASE}' + endpoint
 
     data = {

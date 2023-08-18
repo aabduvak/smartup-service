@@ -27,17 +27,13 @@ class DistrictListView(ListAPIView):
 
 class CreateRegionsView(APIView):
     def post(self, request):
-        if 'Sessionid' not in request.headers:
-            return Response(status=401)
-        
         columns = [
             "region_id",
             "name",
             "lat_lng"
         ]
-        session = request.headers['Sessionid']
         
-        response = get_data(endpoint='/b/anor/mr/region_list+x&table', session=session, columns=columns)
+        response = get_data(endpoint='/b/anor/mr/region_list+x&table', columns=columns)
         if not response:
             return Response(status=500)
         regions = response['data']
@@ -52,17 +48,11 @@ class CreateRegionsView(APIView):
             return Response(status=500)
     
         regions = Region.objects.all()
-        return_data = [{"id": region.id, "smartup_id": region.smartup_id, "name": region.name, 'created_at': region.created_at} for region in regions]
-        
-        return Response(return_data, status=200)
+        serializer = RegionSerializer(regions, many=True)
+        return Response(serializer.data, status=200)
 
 class CreateCitiesView(APIView):
     def post(self, request):
-        if 'Sessionid' not in request.headers:
-            return Response(status=400)
-        
-        session = request.headers['Sessionid']
-        
         regions = Region.objects.all()
         
         for region in regions:
@@ -72,7 +62,7 @@ class CreateCitiesView(APIView):
                 "lat_lng"
             ]
             
-            response = get_data(endpoint='/b/anor/mr/region_list+cities&table', session=session, columns=columns, parent=region.smartup_id)
+            response = get_data(endpoint='/b/anor/mr/region_list+cities&table', columns=columns, parent=region.smartup_id)
             if not response:
                 return Response(status=500)
             cities = response['data']
@@ -89,17 +79,11 @@ class CreateCitiesView(APIView):
                 return Response(status=500)
       
         cities = City.objects.all()
-        return_data = [{"id": city.id, "smartup_id": city.smartup_id, "name": city.name, 'region': city.region.name, 'created_at': city.created_at} for city in cities]
-        
-        return Response(return_data, status=200)
+        serializer = CitySerializer(cities, many=True)
+        return Response(serializer.data, status=200)
 
 class CreateDistrictsView(APIView):
     def post(self, request):
-        if 'Sessionid' not in request.headers:
-            return Response(status=400)
-        
-        session = request.headers['Sessionid']
-        
         cities = City.objects.all()
         
         for city in cities:
@@ -109,7 +93,7 @@ class CreateDistrictsView(APIView):
                 "lat_lng"
             ]
             
-            response = get_data(endpoint='/b/anor/mr/region_list+towns&table', session=session, columns=columns, parent=city.smartup_id)
+            response = get_data(endpoint='/b/anor/mr/region_list+towns&table', columns=columns, parent=city.smartup_id)
             if not response:
                 return Response(status=500)
             towns = response['data']
@@ -126,6 +110,5 @@ class CreateDistrictsView(APIView):
                 return Response(status=500)
       
         towns = District.objects.all()
-        return_data = [{"id": town.id, "smartup_id": town.smartup_id, "name": town.name, 'region': town.city.name, 'created_at': town.created_at} for town in towns]
-        
-        return Response(return_data, status=200)
+        serializer = DistrictSerializer(towns, many=True)
+        return Response(serializer.data, status=200)
