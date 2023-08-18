@@ -33,6 +33,10 @@ def get_data(endpoint: str, columns, limit=100, offset=0, **kwargs):
     if 'remove_parent' in kwargs and kwargs['remove_parent']:
         data.pop("d")
     
+    if 'sort' in kwargs:
+        data["p"]["sort"] = kwargs['sort']
+        data.pop("d")
+    
     if 'filter' in kwargs:
         data["p"]["filter"] = kwargs['filter']
         data["d"]["is_filial"] = "N"
@@ -40,6 +44,10 @@ def get_data(endpoint: str, columns, limit=100, offset=0, **kwargs):
     header = {
         'Cookie': session,
     }
+    
+    if 'branch_id' in kwargs:
+        header['filial_id'] = kwargs['branch_id']
+
     response = requests.post(url=url, json=data, headers=header)
     if response.status_code == 200:
         return response.json()

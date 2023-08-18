@@ -30,4 +30,10 @@ def get_customer_debt_list(branch_id):
         "all_count"
     ]
     
+    # https://banafa.smartup.one
     
+    data = get_data(endpoint='/b/cs/payment/payment_list+x&table', columns=columns, branch_id=branch_id)
+    if data['count'] <= 0:
+        return []
+    
+    return data['data']

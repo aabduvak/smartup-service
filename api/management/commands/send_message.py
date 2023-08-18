@@ -48,7 +48,6 @@ def send_message(phone, message, token):
     
     if response.status_code == 200:
         return response.json()
-    print(response.text)
     return None
     
 
@@ -73,12 +72,11 @@ def send_messages():
             message = f'Hurmatli {payment.customer.name}\nOOO GLAMOUR COSMETICS korxonasiga amalga oshirgan {payment.amount} {currency_name} miqdoridagi to\'lovingiz qabul qilindi. '
             customer = payment.customer
             
-            state = send_message(customer.phone[1:], message, token)
-            print(state)
-            return state       
+            send_message(customer.phone[1:], message, token)
+
 
 class Command(BaseCommand):
-    help = 'Starts the Telegram bot'
+    help = 'Send message to customers who has payment for today'
 
     def handle(self, *args, **options):
         send_messages()

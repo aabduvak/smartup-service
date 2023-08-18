@@ -16,7 +16,7 @@ class Branch(BaseModel):
     smartup_id = models.CharField(max_length=255)
     
     def __str__(self) -> str:
-        return f'{self.name} | {self.smartup_id}'
+        return f'{self.name}'
 
 class Region(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
@@ -54,7 +54,7 @@ class User(BaseModel):
     district = models.ForeignKey(District, on_delete=models.SET_NULL, null=True, blank=True)
     
     def __str__(self) -> str:
-        return f'{self.smartup_id} | {self.name}'
+        return f'{self.name}'
 
 class Brand(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
@@ -100,7 +100,7 @@ class Payment(BaseModel):
     branch = models.ForeignKey(Branch, on_delete=models.SET_NULL, null=True, blank=True)
     date_of_payment = models.DateField()
     def __str__(self) -> str:
-        return 
+        return f'{self.smartup_id}'
 
 class Deal(BaseModel):
     id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
