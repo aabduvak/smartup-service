@@ -1,24 +1,30 @@
-import requests
-from django.conf import settings
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.authtoken.models import Token
+from rest_framework.permissions import AllowAny
 
-from api.models import Region, City, District
-
-LOGIN = settings.SMARTUP_LOGIN
-PASSWORD = settings.SMARTUP_PASSWORD        
-API_BASE = settings.SMARTUP_URL
-
+from api.serializer.user import TokenSerializer, AuthSerializer
 class AuthView(APIView):
+    permission_classes = [AllowAny,]
+    serializer_class = AuthSerializer
+    
     def post(self, request):
-        url = f'https://{API_BASE}/b/anor/s$logon'
-        
-        data = {
-            'login': LOGIN,
-            'password': PASSWORD
-        }
-        response = requests.post(url, data)
-        
-        if response.status_code == 200:
-            return Response(response.cookies.get_dict())
-        return Response(status=response.status_code)
+
+        serializer = self.serializer_class(
+            data=request.data, context={"request": request}
+        )
+        if serializer.is_valid(raise_exception=True):
+            print(serializer.validated_data)
+            user = serializer.validated_data["user"]
+            
+            (token, _) = Token.objects.get_or_create(user=user)
+
+            if token:
+                token_serializer = TokenSerializer(data=token.__dict__, partial=True)
+                if token_serializer.is_valid():
+                    # Return our key for consumption.
+                    return Response(
+                        data={"token": token_serializer.data["token"]},
+                        status=200,
+                    )
+        return Response(serializer.error_messages, status=200)
