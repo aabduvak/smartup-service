@@ -3,7 +3,7 @@ from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from django.conf import settings
-from datetime import datetime
+from datetime import datetime, date
 
 from api.serializer.payment import PaymentSerializer
 from api.models import Payment, Branch, User
@@ -57,20 +57,20 @@ class PaymentDetailView(APIView):
 class CreatePaymentView(APIView):
     def post(self, request):
         branches = BRANCHES_ID
-        date = datetime.now().strftime('%d.%m.%Y')
+        date_of_payment = datetime.now().strftime('%d.%m.%Y')
         
         if 'branch' in request.data:
             branches = [request.data['branch']]
         
         if 'date' in request.data:
-            date = request.data['date']
+            date_of_payment = request.data['date']
         
         for branch in branches:
-            if not create_payments(branch, date):
+            if not create_payments(branch, date_of_payment):
                 return Response({'status':'error', 'message': 'error occured while creating payments'}, status=500)
         
-        date_of_payment = datetime.strptime(date, '%d.%m.%Y').date()
+        today = date.today()
         
-        payments = Payment.objects.filter(date_of_payment=date_of_payment)
+        payments = Payment.objects.filter(created_at__date=today)
         serializer = PaymentSerializer(payments, many=True)
         return Response({'status':'success', 'result': serializer.data}, status=200)

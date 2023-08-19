@@ -54,7 +54,7 @@ class CreateDealView(APIView):
             
         for branch in branches:
             if not create_deals(branch, date_deal):
-                return Response({'status':'error', 'message': 'error occured while creating deas'}, status=500)
+                return Response({'status':'error', 'message': 'error occured while creating deals'}, status=500)
         
         today = date.today()
         

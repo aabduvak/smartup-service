@@ -1,11 +1,14 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from django.conf import settings
+from datetime import date
 
-from api.models import Product, Branch, Brand
+from api.models import Product
 from api.serializer.product import ProductSerializer
-from api.utils.product import create_product
-from api.utils.get_data import get_json_data
+from api.utils.product import create_product, create_products
+
+BRANCHES_ID = settings.BRANCHES_ID
 
 class ProductListView(ListAPIView):
     queryset = Product.objects.all()
@@ -28,36 +31,17 @@ class ProductDetailView(APIView):
 
 class CreateProductView(APIView):
     def post(self, request):
-        if not 'branch' in request.data:
-            return Response(status=400)
+        branches = BRANCHES_ID
         
-        if not Branch.objects.filter(smartup_id=request.data['branch']).exists():
-            return Response(status=404)
+        if 'branch' in request.data:
+            branches = [request.data['branch']]
         
-        branch = Branch.objects.get(smartup_id=request.data['branch'])
-        products = get_json_data(endpoint='/b/es/porting+exp$se_product', branch=branch.smartup_id)
+        for branch in branches:
+            if not create_products(branch):
+                return Response({'status':'error', 'message': 'error occured while creating products'}, status=500)
         
-        for product in products:
-            if Product.objects.filter(code=product['code']).exists():
-                continue
-            
-            new_product = Product.objects.create(
-                    code=product['code'],
-                    smartup_id=product['product_id'],
-                    name=product['name']
-                )
-            
-            if product['ikpu'] != "":
-                new_product.fiskal_code = product['ikpu']
-                
-            if len(product['barcodes']) >= 1:
-                new_product.barcode = product['barcodes'][0]
-            
-            if Brand.objects.filter(name=product['producer_name']).exists():
-                brand = Brand.objects.get(name=product['producer_name'])
-                new_product.brand = brand
-            new_product.save()
+        today = date.today()
         
-        products = Product.objects.all()
+        products = Product.objects.filter(created_at__date=today)
         serializer = ProductSerializer(products, many=True)
         return Response(data=serializer.data)
