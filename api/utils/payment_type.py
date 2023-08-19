@@ -10,7 +10,7 @@ def create_payment_type():
         "currency_name"
     ]
     
-    response = get_data(endpoint='/b/anor/mkr/payment_type_list+x&table', columns=columns, remove_parent=True, filter=filter)
+    response = get_data(endpoint='/b/anor/mkr/payment_type_list+x&table', columns=columns, remove_parent=True)
     if response['count'] <= 0:
         return None
     
