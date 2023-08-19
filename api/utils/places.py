@@ -9,7 +9,7 @@ def create_regions():
     ]
     
     response = get_data(endpoint='/b/anor/mr/region_list+x&table', columns=columns)
-    if response['count'] <= 0:
+    if not response:
         return None
     
     regions = response['data']
@@ -35,7 +35,7 @@ def create_cities():
         ]
         
         response = get_data(endpoint='/b/anor/mr/region_list+cities&table', columns=columns, parent=region.smartup_id)
-        if response['count'] <= 0:
+        if not response:
             return None
         cities = response['data']
     
@@ -47,9 +47,9 @@ def create_cities():
                         name=city[1],
                         region=region
                     )
-            return True
         except:
             return None
+    return True
 
 def create_districts():
     cities = City.objects.all()
@@ -62,7 +62,7 @@ def create_districts():
         ]
         
         response = get_data(endpoint='/b/anor/mr/region_list+towns&table', columns=columns, parent=city.smartup_id)
-        if response['count'] <= 0:
+        if not response:
             return None
         
         towns = response['data']
@@ -75,9 +75,9 @@ def create_districts():
                         name=town[1],
                         city=city
                     )
-            return True
         except:
             return None
+    return True
 
 def create_places():
     if not create_regions():
