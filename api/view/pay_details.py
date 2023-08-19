@@ -1,6 +1,7 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
 
 from api.models import PaymentType, Currency
 from api.serializer.pay_details import PaymentTypeSerializer, CurrencySerializer
@@ -16,6 +17,7 @@ class CurrencyListView(ListAPIView):
     serializer_class = CurrencySerializer
 
 class CreateCurrencyView(APIView):
+    permission_classes = [IsAdminUser,]
     def post(self, request):
         if not create_currency():
             return Response({'status':'error', 'message': 'error occured while creating currencies'}, status=500)
@@ -26,6 +28,7 @@ class CreateCurrencyView(APIView):
         return Response(serializer.data, status=200)
 
 class CreatePaymentTypeView(APIView):
+    permission_classes = [IsAdminUser,] 
     def post(self, request):
 
         if not create_payment_type():

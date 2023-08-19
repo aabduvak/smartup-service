@@ -1,6 +1,7 @@
 from rest_framework.generics import ListAPIView
 from rest_framework.views import APIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
 from django.conf import settings
 from datetime import date
 
@@ -29,7 +30,8 @@ class UserDetailView(APIView):
         serializer = UserSerializer(user)
         return Response(serializer.data)            
 
-class CreateUserView(APIView):    
+class CreateUserView(APIView):
+    permission_classes = [IsAdminUser,] 
     def post(self, request):
         branches = BRANCHES_ID
         

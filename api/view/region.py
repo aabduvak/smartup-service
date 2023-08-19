@@ -2,6 +2,7 @@ from django.conf import settings
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAdminUser
 from datetime import date
 
 from api.serializer.region import RegionSerializer, CitySerializer, DistrictSerializer
@@ -22,6 +23,7 @@ class DistrictListView(ListAPIView):
 
 
 class CreateRegionsView(APIView):
+    permission_classes = [IsAdminUser,]
     def post(self, request):
         if not create_regions():
             return Response({'status':'error', 'message': 'error occured while creating regions'}, status=500)
@@ -33,6 +35,7 @@ class CreateRegionsView(APIView):
         return Response(serializer.data, status=200)
 
 class CreateCitiesView(APIView):
+    permission_classes = [IsAdminUser,]
     def post(self, request):
         if not create_cities():
             return Response({'status':'error', 'message': 'error occured while creating cities'}, status=500)
@@ -44,6 +47,7 @@ class CreateCitiesView(APIView):
         return Response(serializer.data, status=200)
 
 class CreateDistrictsView(APIView):
+    permission_classes = [IsAdminUser,]
     def post(self, request):
         if not create_districts():
             return Response({'status':'error', 'message': 'error occured while creating districts'}, status=500)

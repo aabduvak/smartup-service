@@ -2,6 +2,7 @@ from datetime import datetime
 from rest_framework.views import APIView
 from rest_framework.generics import ListAPIView
 from rest_framework.response import Response
+from rest_framework.permissions import IsAdminUser
 from django.conf import settings
 from datetime import datetime, date
 
@@ -55,6 +56,8 @@ class PaymentDetailView(APIView):
         return Response(serializer.data)
 
 class CreatePaymentView(APIView):
+    permission_classes = [IsAdminUser,]
+    
     def post(self, request):
         branches = BRANCHES_ID
         date_of_payment = datetime.now().strftime('%d.%m.%Y')
