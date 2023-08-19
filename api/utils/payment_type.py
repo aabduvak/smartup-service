@@ -37,13 +37,12 @@ def create_payment_type():
         return None
     
     payment_types = response['data']
-    
     try:
         for payment_type in payment_types:
             if not PaymentType.objects.filter(smartup_id=payment_type[0]).exists():
                 currency = Currency.objects.get(name=payment_type[2])
                 
-                return PaymentType.objects.create(
+                PaymentType.objects.create(
                     smartup_id=payment_type[0],
                     name=payment_type[1],
                     currency=currency
