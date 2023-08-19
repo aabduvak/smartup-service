@@ -1,4 +1,6 @@
+APScheduler==3.6.3
 asgiref==3.7.2
+cachetools==4.2.2
 certifi==2023.7.22
 charset-normalizer==3.2.0
 Django==4.2.4
@@ -10,11 +12,15 @@ inflection==0.5.1
 lxml==4.9.3
 mysqlclient==2.2.0
 packaging==23.1
+python-telegram-bot==13.13
 pytz==2023.3
 PyYAML==6.0.1
 requests==2.31.0
+six==1.16.0
 sqlparse==0.4.4
+tornado==6.3.3
 typing_extensions==4.7.1
 tzdata==2023.3
+tzlocal==5.0.1
 uritemplate==4.1.1
 urllib3==2.0.4
