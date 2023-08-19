@@ -2,6 +2,28 @@ from api.models import PaymentType, Currency
 
 from .get_data import get_data
 
+def create_currency():
+    columns = [
+        "name",
+        "state_name",
+        "currency_id"
+    ]
+    
+    response = get_data(endpoint='/b/anor/mk/currency_list+x&table', columns=columns)
+    if  response['count'] <= 0:
+        return None
+    currencies = response['data']
+    
+    try:    
+        for currency in currencies:
+            if not Currency.objects.filter(name=currency[0]).exists():
+                Currency.objects.create(
+                    name=currency[0]
+                )
+        return True
+    except:
+        return None
+
 def create_payment_type():
 
     columns = [
