@@ -51,6 +51,12 @@ ESKIZ_EMAIL = env('ESKIZ_EMAIL')
 ESKIZ_PASSWORD = env('ESKIZ_PASSWORD')
 ESKIZ_URL = env('ESKIZ_URL')
 
+# Database credentials
+DB_HOST = env('DB_HOST')
+DB_USER = env('DB_USER')
+DB_PASSWORD = env('DB_PASSWORD')
+DB_NAME = env('DB_NAME')
+
 # Application definition
 
 INSTALLED_APPS = [
@@ -102,8 +108,12 @@ WSGI_APPLICATION = 'smartup.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR + '/' + 'db.sqlite3',
+        'ENGINE': 'django.db.backends.mysql',
+        'NAME': DB_NAME,
+        'USER': DB_USER,
+        'PASSWORD': DB_PASSWORD,
+        'HOST': DB_HOST,
+        'PORT': ''
     }
 }
 
@@ -132,7 +142,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/Tashkent'
 
 USE_I18N = True
 
@@ -147,7 +157,7 @@ SWAGGER_SETTINGS = {
         },
         'Bearer': {
             'type': 'apiKey',
-            'name': 'SessionID', # JSESSIONID=cookie
+            'name': 'Authorization', # Token <value>
             'in': 'header'
         }
     }

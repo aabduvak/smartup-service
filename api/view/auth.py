@@ -14,7 +14,6 @@ class AuthView(APIView):
             data=request.data, context={"request": request}
         )
         if serializer.is_valid(raise_exception=True):
-            print(serializer.validated_data)
             user = serializer.validated_data["user"]
             
             (token, _) = Token.objects.get_or_create(user=user)
