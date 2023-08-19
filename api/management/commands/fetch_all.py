@@ -4,6 +4,11 @@ from datetime import datetime
 
 
 from api.utils import (
+    create_currency,
+    create_payment_type,
+    create_places,
+    create_customers,
+    create_products,
     create_payments,
     create_deals
 )
@@ -21,8 +26,22 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         date = datetime.now().strftime('%d.%m.%Y')
+        
+        if not create_currency():
+            error_handler("Error while creating currency", date)
+        
+        if not create_payment_type():
+            error_handler("Error while creating payment type", date)
+        
+        if not create_places():
+            error_handler("Error while creating places", date)
             
         for branch in BRANCHES:
+            if not create_products(branch):
+                error_handler("Error while creating products", date)
+            
+            if not create_customers(branch):
+                error_handler("Error while creating customers", date)
             
             if not create_payments(branch):
                 error_handler("Error while creating payments", date)
