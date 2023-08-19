@@ -1,10 +1,86 @@
+import requests
+from lxml import etree
 from datetime import datetime, date
 from django.db.models import Q
 from decimal import Decimal
-import json
-from api.models import User, Payment, Currency
+from django.conf import settings
+
+
+from api.models import User, Payment, Currency, PaymentType, Branch
+
 from .get_data import get_data
 from .customer import create_customer
+
+LOGIN = settings.SMARTUP_LOGIN
+PASSWORD = settings.SMARTUP_PASSWORD        
+API_BASE = settings.SMARTUP_URL
+
+def create_payments(branch_id, date):
+    url = f'https://{API_BASE}/b/es/porting+exp$payment'
+    
+    xml_data = f"""
+        <?xml version="1.0" encoding="utf-8"?>
+        <Root>
+            <Logon>
+                <login>{LOGIN}</login>
+                <password>{PASSWORD}</password>
+                <filial>{branch_id}</filial>
+                <date>{date}</date>
+            </Logon>
+        </Root>
+        """
+    xml_data = xml_data.strip()
+    
+    headers = {
+        'Content-Type': 'application/xml',
+    }
+    
+    response = requests.post(url, data=xml_data, headers=headers)
+    if response.status_code != 200:
+        None
+    
+    try:
+        parser = etree.XMLParser(recover=True)
+        root = etree.fromstring(response.content, parser=parser)
+
+        payments = root.xpath("//Оплата")
+        
+        for payment in payments:
+            info = {
+                "customer_id": payment.find("ИдКонтрагента").text,
+                "payment_id": payment.find("ИдОплаты").text,
+                "payment_type_id": payment.find("ИдТипаОплаты").text,
+                "amount": payment.find("Сумма").text,
+                "base_amount": payment.find("Базовая").text,
+                "date_of_payment": payment.find("ДатаОплаты").text,
+            }
+
+            if Payment.objects.filter(smartup_id=info['payment_id']).exists():
+                continue
+            
+            if not User.objects.filter(smartup_id=info['customer_id']).exists():
+                create_customer(info['customer_id'])
+            
+            user = User.objects.get(smartup_id=info['customer_id'])
+            payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
+            amount =  Decimal(info['amount'])
+            base_amount = Decimal(info['base_amount'])
+            date_of_payment = datetime.strptime(info['date_of_payment'], '%d.%m.%Y').date()
+            branch = Branch.objects.get(smartup_id=branch_id)
+            
+            payment = Payment.objects.create(
+                smartup_id=info['payment_id'],
+                customer=user,
+                payment_type=payment_type,
+                amount=amount,
+                base_amount=base_amount,
+                date_of_payment=date_of_payment.strftime('%Y-%m-%d'),
+                branch=branch,
+            )
+        
+        return True
+    except:
+        return None
 
 def get_payment_list(branch_id, date_of_payment=None):
     payment_date = date.today()
