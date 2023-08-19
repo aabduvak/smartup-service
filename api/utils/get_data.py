@@ -33,13 +33,13 @@ def get_data(endpoint: str, columns, limit=100, offset=0, **kwargs):
     if 'remove_parent' in kwargs and kwargs['remove_parent']:
         data.pop("d")
     
-    if 'sort' in kwargs:
-        data["p"]["sort"] = kwargs['sort']
-        data.pop("d")
-    
     if 'filter' in kwargs:
         data["p"]["filter"] = kwargs['filter']
         data["d"]["is_filial"] = "N"
+    
+    if 'sort' in kwargs:
+        data["p"]["sort"] = kwargs['sort']
+        data.pop("d")
     
     header = {
         'Cookie': session,
