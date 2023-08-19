@@ -67,6 +67,7 @@ def create_products(branch):
     if not products:
         return None
     try:
+        create_brands()
         for product in products:
             if Product.objects.filter(code=product['code']).exists():
                 continue
