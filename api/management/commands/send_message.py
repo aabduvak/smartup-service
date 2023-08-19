@@ -60,10 +60,10 @@ def prepare_message(customer, payment, debt):
     message = f'Hurmatli {customer.name}\nOOO GLAMOUR COSMETICS korxonasiga {payment_date} kuni amalga oshirgan {payment.amount} {currency_name} miqdoridagi to\'lovingiz qabul qilindi. '
             
     if debt:
-        if len(debt['customers']) == 1 and debt["customers"][0]["amount"] > 0:
-            message += f'Mavjud qarzdorlik {debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]}'
-        elif len(debt['customers']) == 2 and (debt["customers"][0]['amount'] > 0 or debt["customers"][1]['amount'] > 0):
-            message += f'Mavjud qarzdorlik {debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]} va {debt["customers"][1]["amount"]} {debt["customers"][1]["currency"]}'
+        if len(debt['customers']) == 1:
+            message += f'Mavjud balans {debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]}'
+        elif len(debt['customers']) == 2:
+            message += f'Mavjud balans {debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]} va {debt["customers"][1]["amount"]} {debt["customers"][1]["currency"]}'
     
     return message
 

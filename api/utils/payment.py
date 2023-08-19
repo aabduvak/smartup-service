@@ -104,7 +104,7 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
             "name": user.name,
             "phone": user.phone,
             "currency": currency_name,
-            "amount": float(customer[2]) * -1,
+            "amount": float(customer[2]),
         }
         
         if item["amount"] < 0:
