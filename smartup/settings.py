@@ -58,6 +58,9 @@ DB_USER = env('DB_USER')
 DB_PASSWORD = env('DB_PASSWORD')
 DB_NAME = env('DB_NAME')
 
+TELEGRAM_TOKEN = env('TELEGRAM_TOKEN')
+CHAT_ID = env('CHAT_ID')
+
 # Application definition
 
 INSTALLED_APPS = [
