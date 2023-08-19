@@ -67,7 +67,6 @@ def create_products(branch):
     if not products:
         return None
     try:
-        create_brands()
         for product in products:
             if Product.objects.filter(code=product['code']).exists():
                 continue
@@ -84,10 +83,14 @@ def create_products(branch):
             if len(product['barcodes']) >= 1:
                 new_product.barcode = product['barcodes'][0]
             
+            if not Brand.objects.filter(name=product['producer_name']).exists():
+                create_brands()
+            
             if Brand.objects.filter(name=product['producer_name']).exists():
                 brand = Brand.objects.get(name=product['producer_name'])
                 new_product.brand = brand
             new_product.save()
+        
         return True
     except:
         return None
