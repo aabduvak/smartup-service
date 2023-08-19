@@ -35,7 +35,7 @@ def create_cities():
         ]
         
         response = get_data(endpoint='/b/anor/mr/region_list+cities&table', columns=columns, parent=region.smartup_id)
-        if not response:
+        if response['count'] <= 0:
             return None
         cities = response['data']
     
