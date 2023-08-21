@@ -12,12 +12,12 @@ from .get_data import get_data
 from .customer import create_customer
 
 LOGIN = settings.SMARTUP_LOGIN
-PASSWORD = settings.SMARTUP_PASSWORD        
+PASSWORD = settings.SMARTUP_PASSWORD
 API_BASE = settings.SMARTUP_URL
 
 def create_payments(branch_id, date):
     url = f'https://{API_BASE}/b/es/porting+exp$payment'
-    
+
     xml_data = f"""
         <?xml version="1.0" encoding="utf-8"?>
         <Root>
@@ -30,21 +30,21 @@ def create_payments(branch_id, date):
         </Root>
         """
     xml_data = xml_data.strip()
-    
+
     headers = {
         'Content-Type': 'application/xml',
     }
-    
+
     response = requests.post(url, data=xml_data, headers=headers)
     if response.status_code != 200:
         None
-    
+
     try:
         parser = etree.XMLParser(recover=True)
         root = etree.fromstring(response.content, parser=parser)
 
         payments = root.xpath("//Оплата")
-        
+
         for payment in payments:
             info = {
                 "customer_id": payment.find("ИдКонтрагента").text,
@@ -57,17 +57,17 @@ def create_payments(branch_id, date):
 
             if Payment.objects.filter(smartup_id=info['payment_id']).exists():
                 continue
-            
+
             if not User.objects.filter(smartup_id=info['customer_id']).exists():
                 create_customer(info['customer_id'])
-            
+
             user = User.objects.get(smartup_id=info['customer_id'])
             payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
             amount =  Decimal(info['amount'])
             base_amount = Decimal(info['base_amount'])
             date_of_payment = datetime.strptime(info['date_of_payment'], '%d.%m.%Y').date()
             branch = Branch.objects.get(smartup_id=branch_id)
-            
+
             payment = Payment.objects.create(
                 smartup_id=info['payment_id'],
                 customer=user,
@@ -77,7 +77,7 @@ def create_payments(branch_id, date):
                 date_of_payment=date_of_payment.strftime('%Y-%m-%d'),
                 branch=branch,
             )
-        
+
         return True
     except:
         return None
@@ -90,7 +90,7 @@ def get_payment_list(branch_id, date_of_payment=None):
     payments_query = Payment.objects.filter(
         Q(date_of_payment=payment_date) & Q(branch__smartup_id=branch_id)
     )
-    
+
     return payments_query
 
 def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
@@ -104,7 +104,7 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
         currency_id = '200'
     elif currency == 'UZS':
         currency_id = '0'
-    
+
     if customer_id and currency:
         filter = [
             "and",
@@ -114,7 +114,7 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
                     "=",
                     [
                         customer_id
-                    ]    
+                    ]
                 ],
                 [
                     "currency_id",
@@ -131,7 +131,7 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
             "=",
             [
                 customer_id
-            ] 
+            ]
         ]
     elif currency:
         filter = [
@@ -141,15 +141,15 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
                 currency_id
             ]
         ]
-    
+
     sort = [
         "total_amount"
     ]
-        
+
     response = get_data(endpoint='/b/cs/payment/payment_list+x&table', limit=limit, columns=columns, sort=sort, filter=filter, branch_id=branch_id)
     if response['count'] <= 0:
         return None
-    
+
     data = {
         "total_company_debt": {
             "USD": 0,
@@ -163,18 +163,18 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
         "total_usd": 0,
         "customers": [],
     }
-    
+
     for customer in response['data']:
         if not User.objects.filter(smartup_id=customer[0]).exists():
             if not create_customer(customer[0]):
                 continue
         user = User.objects.get(smartup_id=customer[0])
         currency = Currency.objects.get(name=customer[1])
-        
+
         currency_name = currency.name
         if currency.name.lower() == 'sum' or currency.name.lower() == 'base sum':
             currency_name = "UZS"
-            
+
         item = {
             "smartup_id": customer[0],
             "name": user.name,
@@ -182,7 +182,7 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
             "currency": currency_name,
             "amount": float(customer[2]),
         }
-        
+
         if item["amount"] < 0:
             if item["currency"] == 'USD':
                 data["total_company_debt"]['USD'] += item["amount"]
