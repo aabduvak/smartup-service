@@ -1,13 +1,39 @@
 import requests
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from datetime import datetime
+from datetime import datetime, date
+
 from api.utils.payment import get_payment_list, get_debt_list
+from api.models import *
 
 ESKIZ_EMAIL = settings.ESKIZ_EMAIL
 ESKIZ_PASSWORD = settings.ESKIZ_PASSWORD
 ESKIZ_URL = settings.ESKIZ_URL
 BRANCHES_ID = settings.BRANCHES_ID
+
+TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
+CHAT_ID = settings.CHAT_ID
+
+def send_telegram_message(message):
+    api_url = f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage'
+    payload = {
+        'chat_id': CHAT_ID,
+        'text': message,
+        'protect_content': True,
+    }
+
+    response = requests.post(api_url, json=payload)
+
+def success_handler(status, data):
+    today = date.today()
+
+    message = f'Отчет от провайдера 📊\n\n' \
+        + f'📅  Дата: {today}\n' \
+        + f'📤  Отправленные сообщения: {data["success"]} шт\n' \
+        + f'📥  Неотправленные сообщения: {data["error"]} шт\n\n' \
+        + f'Статус:\n{status} ✅'
+    
+    send_telegram_message(message)
 
 def get_token():
     url = f'http://{ESKIZ_URL}/auth/login'
@@ -68,12 +94,17 @@ def prepare_message(customer, payment, debt):
     return message
 
 def send_messages():
-    data = get_token()
-    if data is None:
+    token = get_token()
+    if token is None:
         return # Invalid token
     
-    token = data['data']['token']
+    token = token['data']['token']
+    data = {
+        'success': 3,
+        'error': 0
+    }
     
+
     for branch in BRANCHES_ID:
         payments = get_payment_list(branch, date_of_payment='2023-08-18')
         
@@ -86,11 +117,13 @@ def send_messages():
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
-            print('\n')
-            print(message)
-            print('\n')
-            
-            # send_message(customer.phone[1:], message, token)
+            state = send_message(customer.phone[1:], message, token)
+            if not state or state['status'] not in ['Waiting', 'DELIVRD', 'TRANSMTD']:
+                data['error'] += 1
+            else:
+                data['success'] += 1
+    
+    success_handler('Отправлено сообщение клиентам, у которых есть оплата', data=data)
 
 
 class Command(BaseCommand):
