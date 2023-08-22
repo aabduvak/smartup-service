@@ -13,6 +13,7 @@ BRANCHES_ID = settings.BRANCHES_ID
 
 TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
 CHAT_ID = settings.CHAT_ID
+STATUS_LIST = ['DELIVRD', 'TRANSMTD', 'WAITING']
 
 def send_telegram_message(message):
     api_url = f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage'
@@ -110,15 +111,15 @@ def send_messages():
 
         for payment in payments:
             if not payment.customer.phone:
+                data["error"] += 1
                 continue
-
 
             customer = payment.customer
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
             state = send_message(customer.phone[1:], message, token)
-            if not state or state['status'] not in ['Waiting', 'DELIVRD', 'TRANSMTD']:
+            if not state or state['status'].upper() not in STATUS_LIST:
                 data['error'] += 1
             else:
                 data['success'] += 1
