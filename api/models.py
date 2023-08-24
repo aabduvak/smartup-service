@@ -122,3 +122,14 @@ class OrderDetails(BaseModel):
     currency = models.ForeignKey(Currency, on_delete=models.SET_NULL, null=True, blank=True)
     def __str__(self) -> str:
         return f'Order for {self.quantity} {self.product.name} in Deal {self.deal.smartup_id}'
+
+
+class WorkPlace(BaseModel):
+    id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
+    name = models.CharField(max_length=100)
+    smartup_id = models.CharField(max_length=255)
+    customers = models.ManyToManyField(User, related_name='workplaces', blank=True)
+    
+    code = models.CharField(max_length=255, null=True, blank=True)
+    def __str__(self):
+        return self.name
