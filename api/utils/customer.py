@@ -3,9 +3,10 @@ import requests
 from django.conf import settings
 from lxml import etree
 
-from api.models import User, District
+from api.models import User, District, WorkPlace
 from .get_data import get_data
 from .phone import validate_phone_number, format_phone_number
+from .workplace import create_workplace
 
 LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD        
@@ -44,9 +45,11 @@ def create_customers(branch):
         for customer in customers:
             name = customer.find("ПолноеНазваниеКонтрагента").text
             try:
-                phone = customer.find("КонтактыКонтрагент/ОсновнойТелефон").text
+                phone = customer.find("РабочиеМестоКонтрагента").text
             except:
                 phone = None
+            
+            
             customer_id = customer.find("ИдКонтрагент").text
             district = customer.find("Район").text
             address = customer.find("ОсновнойАдрес").text
@@ -57,24 +60,46 @@ def create_customers(branch):
                 "id": customer_id,
                 "district": district,
                 "address": address,
+                "workplaces": []
             }
+            
+            try:
+                workplaces = customer.findall("РабочееМесто")
+                for workplace in workplaces:
+                    customer_info["workplaces"].append({
+                        'id': workplace.find('ИдРабочегеМесто').text,
+                        'code': workplace.find('КодРабочегеМесто').text,
+                        'name': workplace.find('НазваниеРабочегеМесто').text
+                    })                
+            except:
+                pass
             customer_data.append(customer_info)
             
         for customer in customer_data:
-            if not User.objects.filter(smartup_id=customer['id']).exists():
-                phone = customer['phone']
-                if phone and not validate_phone_number(phone):
-                    phone = format_phone_number(phone)
-                user = User.objects.create(
-                    smartup_id=customer['id'],
-                    name=customer['name'],
-                    phone=phone,
-                    address=customer['address']
-                )
-                if customer['district'] and District.objects.filter(name=customer['district']):
-                    district = District.objects.filter(name=customer['district']).first()
-                    user.district = district
-                    user.save()
+            if User.objects.filter(smartup_id=customer['id']).exists():
+                continue
+            
+            phone = customer['phone']
+            if phone and not validate_phone_number(phone):
+                phone = format_phone_number(phone)
+            user = User.objects.create(
+                smartup_id=customer['id'],
+                name=customer['name'],
+                phone=phone,
+                address=customer['address']
+            )
+            if customer['district'] and District.objects.filter(name=customer['district']):
+                district = District.objects.filter(name=customer['district']).first()
+                user.district = district
+                user.save()
+            
+            if len(customer['workplaces']) > 0:
+                for place in customer['workplaces']:
+                    if not WorkPlace.objects.filter(smartup_id=place['id']).exists():
+                        create_workplace(branch_id=branch)
+                    
+                    workplace = WorkPlace.objects.get(smartup_id=place['id'])
+                    workplace.customers.add(user)
         return True
     except:
         return None

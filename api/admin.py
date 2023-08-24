@@ -10,7 +10,7 @@ admin.site.register(City)
 admin.site.register(PaymentType)
 admin.site.register(Currency)
 admin.site.register(Brand)
-
+admin.site.register(WorkPlace)
 
 @admin.register(Payment)
 class PaymentAdmin(admin.ModelAdmin):
