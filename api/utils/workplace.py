@@ -61,3 +61,17 @@ def create_workplace(id, branch_id):
             name=workplace[2]
         )
     return True
+
+def get_workplace_list():
+    return WorkPlace.objects.all()
+
+def get_disabled_workplace_list():
+    return WorkPlace.objects.filter(is_active=False)
+
+def disabled_workplace(customer):
+    blacklist = get_disabled_workplace_list()
+    workplaces = customer.workplaces.all()
+    for workplace in workplaces:
+        if workplace in blacklist:
+            return True
+    return False

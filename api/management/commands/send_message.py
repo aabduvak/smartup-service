@@ -1,9 +1,9 @@
 import requests
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from datetime import datetime, date
+from datetime import date
 
-from api.utils.payment import get_payment_list, get_debt_list
+from api.utils import get_payment_list, get_debt_list, disabled_workplace
 from api.models import *
 
 ESKIZ_EMAIL = settings.ESKIZ_EMAIL
@@ -29,9 +29,11 @@ def success_handler(status, data):
     today = date.today()
 
     message = f'Отчет от провайдера 📊\n\n' \
-        + f'📅  Дата: {today}\n' \
-        + f'📤  Отправленные сообщения: {data["success"]} шт\n' \
-        + f'📥  Неотправленные сообщения: {data["error"]} шт\n\n' \
+        + f'📅  Дата: {today}\n\n' \
+        + f'Отправленные сообщения: {data["success"]} шт\n' \
+        + f'Неверные номера: {data["invalid"]} шт\n' \
+        + f'Отключенные рабочие места: {data["disabled"]} шт\n' \
+        + f'Неотправленные сообщения: {data["error"]} шт\n\n' \
         + f'Статус:\n{status} ✅'
 
     send_telegram_message(message)
@@ -102,27 +104,33 @@ def send_messages():
     token = token['data']['token']
     data = {
         'success': 0,
-        'error': 0
+        'error': 0,
+        'invalid': 0,
+        'disabled': 0
     }
 
 
     for branch in BRANCHES_ID:
         payments = get_payment_list(branch)
-
         for payment in payments:
-            if not payment.customer.phone:
-                data["error"] += 1
-                continue
-
             customer = payment.customer
+            
+            if disabled_workplace(customer):
+                data["disabled"] += 1
+                continue
+            
+            if not customer.phone:
+                data["invalid"] += 1
+                continue
+            
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
             state = send_message(customer.phone[1:], message, token)
-            if not state or state['status'].upper() not in STATUS_LIST:
-                data['error'] += 1
-            else:
+            if state and state['status'].upper() in STATUS_LIST:
                 data['success'] += 1
+            else:
+                data['error'] += 1
 
     success_handler('Отправлено сообщение клиентам, у которых есть оплата', data=data)
 

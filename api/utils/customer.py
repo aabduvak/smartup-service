@@ -90,7 +90,6 @@ def create_customers(branch):
             user.save()
         
         if len(customer_info['workplaces']) > 0:
-            print(customer_info['workplaces'])
             for place in customer_info['workplaces']:
                 
                 if not WorkPlace.objects.filter(smartup_id=place['id']).exists():
