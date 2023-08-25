@@ -75,3 +75,15 @@ def disabled_workplace(customer):
         if workplace in blacklist:
             return True
     return False
+
+def toggle_workplace(id):
+    if not id:
+        return None
+    
+    workplace = WorkPlace.objects.get(id=id)
+    if workplace.is_active:
+        workplace.is_active = False
+    else:
+        workplace.is_active = True
+    workplace.save()
+    return True
