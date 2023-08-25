@@ -56,7 +56,7 @@ class Command(BaseCommand):
                 error_handler("❌ Error while creating customers", date)
                 return
             
-            if not create_payments(branch):
+            if not create_payments(branch, date):
                 error_handler("❌ Error while creating payments", date)
                 return
             
