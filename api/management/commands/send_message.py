@@ -3,7 +3,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from datetime import date
 
-from api.utils import get_payment_list, get_debt_list, disabled_workplace
+from api.utils import get_payment_list, get_debt_list, disabled_workplace, send_telegram_message
 from api.models import *
 
 ESKIZ_EMAIL = settings.ESKIZ_EMAIL
@@ -11,19 +11,8 @@ ESKIZ_PASSWORD = settings.ESKIZ_PASSWORD
 ESKIZ_URL = settings.ESKIZ_URL
 BRANCHES_ID = settings.BRANCHES_ID
 
-TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
-CHAT_ID = settings.CHAT_ID
+
 STATUS_LIST = ['DELIVRD', 'TRANSMTD', 'WAITING']
-
-def send_telegram_message(message):
-    api_url = f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage'
-    payload = {
-        'chat_id': CHAT_ID,
-        'text': message,
-        'protect_content': True,
-    }
-
-    response = requests.post(api_url, json=payload)
 
 def success_handler(status, data):
     today = date.today()
