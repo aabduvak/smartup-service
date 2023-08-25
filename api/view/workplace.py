@@ -38,7 +38,8 @@ class WorkPlaceDetailView(APIView):
         
         data = serializer.data
         users = user_serializer.data
-
+        
+        data['count'] = customers.count()
         data['customers'] = users
         return Response(data)
 

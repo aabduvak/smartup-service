@@ -35,74 +35,70 @@ def create_customers(branch):
     if response.status_code != 200:
         return None
     
-    try:
-        parser = etree.XMLParser(recover=True)
-        root = etree.fromstring(response.content, parser=parser)
+    parser = etree.XMLParser(recover=True)
+    root = etree.fromstring(response.content, parser=parser)
 
-        customers = root.xpath("//Контрагент")
+    customers = root.xpath("//Контрагент")
+    
+    customer_data = []
+    for customer in customers:
+        customer_id = customer.find("ИдКонтрагент").text
+        name = customer.find("ПолноеНазваниеКонтрагента").text
         
-        customer_data = []
-        for customer in customers:
-            name = customer.find("ПолноеНазваниеКонтрагента").text
-            try:
-                phone = customer.find("РабочиеМестоКонтрагента").text
-            except:
-                phone = None
-            
-            
-            customer_id = customer.find("ИдКонтрагент").text
-            district = customer.find("Район").text
-            address = customer.find("ОсновнойАдрес").text
-            
-            customer_info = {
-                "name": name,
-                "phone": phone,
-                "id": customer_id,
-                "district": district,
-                "address": address,
-                "workplaces": []
-            }
-            
-            try:
-                workplaces = customer.findall("РабочееМесто")
-                for workplace in workplaces:
-                    customer_info["workplaces"].append({
-                        'id': workplace.find('ИдРабочегеМесто').text,
-                        'code': workplace.find('КодРабочегеМесто').text,
-                        'name': workplace.find('НазваниеРабочегеМесто').text
-                    })                
-            except:
-                pass
-            customer_data.append(customer_info)
-            
-        for customer in customer_data:
-            if User.objects.filter(smartup_id=customer['id']).exists():
-                continue
-            
-            phone = customer['phone']
-            if phone and not validate_phone_number(phone):
-                phone = format_phone_number(phone)
-            user = User.objects.create(
-                smartup_id=customer['id'],
-                name=customer['name'],
-                phone=phone,
-                address=customer['address']
-            )
-            if customer['district'] and District.objects.filter(name=customer['district']):
-                district = District.objects.filter(name=customer['district']).first()
-                user.district = district
-                user.save()
-            
-            if len(customer['workplaces']) > 0:
-                for place in customer['workplaces']:
-                    if not WorkPlace.objects.filter(smartup_id=place['id']).exists():
-                        create_workplace(branch_id=branch)
-                    
-                    workplace = WorkPlace.objects.get(smartup_id=place['id'])
-                    workplace.customers.add(user)
-        return True
-    except:
-        return None
+        if User.objects.filter(smartup_id=customer_id).exists():
+            continue
+        district = customer.find("Район").text
+        address = customer.find("ОсновнойАдрес").text
+        
+        try:
+            phone = customer.find("КонтактыКонтрагент/ОсновнойТелефон").text
+        except:
+            phone = None
+        
+        customer_info = {
+            "name": name,
+            "phone": phone,
+            "id": customer_id,
+            "district": district,
+            "address": address,
+            "workplaces": []
+        }
+        
+        parent = customer.find('РабочиеМестоКонтрагента')
+        if parent:
+            workplaces = parent.findall("РабочееМесто")
+            for workplace in workplaces:
+                customer_info["workplaces"].append({
+                    'id': workplace.find('ИдРабочегеМесто').text,
+                    'code': workplace.find('КодРабочегеМесто').text,
+                    'name': workplace.find('НазваниеРабочегеМесто').text
+                })                
+
+        if customer_info["phone"] and not validate_phone_number(customer_info["phone"]):
+            customer_info["phone"] = format_phone_number(customer_info["phone"])
+
+        user = User.objects.create(
+            smartup_id=customer_info['id'],
+            name=customer_info['name'],
+            phone=customer_info["phone"],
+            address=customer_info["address"]
+        )
+        
+        if customer_info['district'] and District.objects.filter(name=customer_info['district']):
+            district = District.objects.filter(name=customer_info['district']).first()
+            user.district = district
+            user.save()
+        
+        if len(customer_info['workplaces']) > 0:
+            print(customer_info['workplaces'])
+            for place in customer_info['workplaces']:
+                
+                if not WorkPlace.objects.filter(smartup_id=place['id']).exists():
+                    if not create_workplace(id=place['id'], branch_id=branch):
+                        continue
+                workplace = WorkPlace.objects.get(smartup_id=place['id'])
+                workplace.customers.add(user)
+    return True
 
 def create_customer(id: str):
     columns = [

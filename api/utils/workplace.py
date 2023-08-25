@@ -36,22 +36,10 @@ def create_workplace(id, branch_id):
     if not id:
         return None
     
-    filter = [
-        "and",
-        [
-            [
-                "room_id",
-                "=",
-                id
-            ],
-            [
-                "state",
-                "=",
-                [
-                    "A"
-                ]
-            ]
-        ]
+    filter =  [
+        "room_id",
+        "=",
+        id
     ]
     
     columns = [
