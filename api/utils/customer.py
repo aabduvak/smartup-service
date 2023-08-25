@@ -100,7 +100,7 @@ def create_customers(branch):
                 workplace.customers.add(user)
     return True
 
-def create_customer(id: str):
+def create_customer(id: str, branch_id=None):
     columns = [
         "person_id",
         "name",
@@ -109,6 +109,7 @@ def create_customer(id: str):
         "post_address",
         "ref_code",
         "state",
+        "room_names",
         "in_filial_state"
     ]
     
@@ -118,13 +119,13 @@ def create_customer(id: str):
         id
     ]
    
-    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, filter=filter)
+    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, filter=filter, branch_id=branch_id)
     
     if data['count'] <= 0:
         return None
     
     customer = data['data'][0]
-    
+    print(customer)
     if User.objects.filter(smartup_id=customer[0]).exists():
         return User.objects.get(smartup_id=customer[0])
     
@@ -139,6 +140,10 @@ def create_customer(id: str):
         address=customer[4]
     )
     
+    workplace_names = customer[7].split(',')
+    for name in workplace_names:
+        if WorkPlace.objects.filter(name=name).exists():
+            WorkPlace.objects.get(name=name).customers.add(user)
     if District.objects.filter(name=customer[3]).exists():
         user.district = District.objects.filter(name=customer[3]).first()
         user.save()

@@ -7,6 +7,7 @@ from datetime import date
 
 from api.models import User
 from api.serializer.customer import UserSerializer
+from api.serializer.workplace import WorkPlaceSerializer
 from api.utils.customer import create_customer, create_customers
 
 BRANCHES_ID = settings.BRANCHES_ID
@@ -21,14 +22,22 @@ class UserDetailView(APIView):
             return Response(status=400)
         
         if not User.objects.filter(smartup_id=smartup_id):
-            user = create_customer(smartup_id)
+            for branch in BRANCHES_ID:
+                user = create_customer(id=smartup_id, branch_id=branch)
+                
+                if user:
+                    break
             
             if not user:
                 return Response(status=404)
         
         user = User.objects.get(smartup_id=smartup_id)
         serializer = UserSerializer(user)
-        return Response(serializer.data)            
+        workplaces_serializer = WorkPlaceSerializer(user.workplaces.all(), many=True)
+        
+        data = serializer.data
+        data['workplaces'] = workplaces_serializer.data
+        return Response(data=data)  
 
 class CreateUserView(APIView):
     permission_classes = [IsAdminUser,] 
@@ -40,7 +49,7 @@ class CreateUserView(APIView):
             
         for branch in branches:
             if not create_customers(branch):
-                return Response({'status':'error', 'message': 'error occured while creating deas'}, status=500)
+                return Response({'status':'error', 'message': 'error occured while creating deal'}, status=500)
         
         today = date.today()
         

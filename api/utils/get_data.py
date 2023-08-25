@@ -45,7 +45,7 @@ def get_data(endpoint: str, columns, limit=100, offset=0, **kwargs):
         'Cookie': session,
     }
     
-    if 'branch_id' in kwargs:
+    if 'branch_id' in kwargs and kwargs['branch_id']:
         header['filial_id'] = kwargs['branch_id']
 
     response = requests.post(url=url, json=data, headers=header)

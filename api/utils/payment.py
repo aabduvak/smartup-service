@@ -59,7 +59,8 @@ def create_payments(branch_id, date):
                 continue
 
             if not User.objects.filter(smartup_id=info['customer_id']).exists():
-                create_customer(info['customer_id'])
+                if not create_customer(info['customer_id'], branch_id=branch_id):
+                    continue
 
             user = User.objects.get(smartup_id=info['customer_id'])
             payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
@@ -166,7 +167,7 @@ def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
 
     for customer in response['data']:
         if not User.objects.filter(smartup_id=customer[0]).exists():
-            if not create_customer(customer[0]):
+            if not create_customer(customer[0], branch_id=branch_id):
                 continue
         user = User.objects.get(smartup_id=customer[0])
         currency = Currency.objects.get(name=customer[1])

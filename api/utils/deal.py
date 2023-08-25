@@ -89,7 +89,7 @@ def create_deals(branch_id, date):
                 continue
 
             if not User.objects.filter(smartup_id=info['customer_id']).exists():
-                create_customer(info['customer_id'])
+                create_customer(info['customer_id'], branch_id=branch_id)
             
             user = User.objects.get(smartup_id=info['customer_id'])
             
