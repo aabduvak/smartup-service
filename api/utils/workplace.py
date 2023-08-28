@@ -1,3 +1,5 @@
+from asgiref.sync import sync_to_async
+
 from api.models import WorkPlace
 from .get_data import get_data
 
@@ -62,8 +64,10 @@ def create_workplace(id, branch_id):
         )
     return True
 
+@sync_to_async
 def get_workplace_list():
-    return WorkPlace.objects.all()
+    workplaces = WorkPlace.objects.all()
+    return workplaces
 
 def get_disabled_workplace_list():
     return WorkPlace.objects.filter(is_active=False)
