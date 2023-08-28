@@ -39,49 +39,49 @@ def create_payments(branch_id, date):
     if response.status_code != 200:
         None
 
-    try:
-        parser = etree.XMLParser(recover=True)
-        root = etree.fromstring(response.content, parser=parser)
+    parser = etree.XMLParser(recover=True)
+    root = etree.fromstring(response.content, parser=parser)
 
-        payments = root.xpath("//Оплата")
+    payments = root.xpath("//Оплата")
 
-        for payment in payments:
-            info = {
-                "customer_id": payment.find("ИдКонтрагента").text,
-                "payment_id": payment.find("ИдОплаты").text,
-                "payment_type_id": payment.find("ИдТипаОплаты").text,
-                "amount": payment.find("Сумма").text,
-                "base_amount": payment.find("Базовая").text,
-                "date_of_payment": payment.find("ДатаОплаты").text,
-            }
+    for payment in payments:
+        info = {
+            "customer_id": payment.find("ИдКонтрагента").text,
+            "payment_id": payment.find("ИдОплаты").text,
+            "payment_type_id": payment.find("ИдТипаОплаты").text,
+            "amount": payment.find("Сумма").text,
+            "base_amount": payment.find("Базовая").text,
+            "date_of_payment": payment.find("ДатаОплаты").text,
+        }
 
-            if Payment.objects.filter(smartup_id=info['payment_id']).exists():
+        if Payment.objects.filter(smartup_id=info['payment_id']).exists():
+            continue
+
+        if not User.objects.filter(smartup_id=info['customer_id']).exists():
+            if not create_customer(info['customer_id'], branch_id=branch_id):
                 continue
 
-            if not User.objects.filter(smartup_id=info['customer_id']).exists():
-                if not create_customer(info['customer_id'], branch_id=branch_id):
-                    continue
+        user = User.objects.get(smartup_id=info['customer_id'])
+        payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
+        amount =  Decimal(info['amount'])
+        base_amount = Decimal(info['base_amount'])
+        date_of_payment = datetime.strptime(info['date_of_payment'], '%d.%m.%Y').date()
 
-            user = User.objects.get(smartup_id=info['customer_id'])
-            payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
-            amount =  Decimal(info['amount'])
-            base_amount = Decimal(info['base_amount'])
-            date_of_payment = datetime.strptime(info['date_of_payment'], '%d.%m.%Y').date()
-            branch = Branch.objects.get(smartup_id=branch_id)
+        payment = Payment.objects.create(
+            smartup_id=info['payment_id'],
+            customer=user,
+            payment_type=payment_type,
+            amount=amount,
+            base_amount=base_amount,
+            date_of_payment=date_of_payment.strftime('%Y-%m-%d')
+        )
 
-            payment = Payment.objects.create(
-                smartup_id=info['payment_id'],
-                customer=user,
-                payment_type=payment_type,
-                amount=amount,
-                base_amount=base_amount,
-                date_of_payment=date_of_payment.strftime('%Y-%m-%d'),
-                branch=branch,
-            )
+        if Branch.objects.filter(smartup_id=str(branch_id)).exists():
+            branch = Branch.objects.get(smartup_id=str(branch_id))
+            payment.branch = branch
+            payment.save()
 
-        return True
-    except:
-        return None
+    return True
 
 def get_payment_list(branch_id, date_of_payment=None):
     payment_date = date.today()

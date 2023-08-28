@@ -57,6 +57,7 @@ DB_HOST = env('DB_HOST')
 DB_USER = env('DB_USER')
 DB_PASSWORD = env('DB_PASSWORD')
 DB_NAME = env('DB_NAME')
+DB_PORT = env('DB_PORT')
 
 TELEGRAM_TOKEN = env('TELEGRAM_TOKEN')
 CHAT_ID = env('CHAT_ID')
@@ -113,14 +114,12 @@ WSGI_APPLICATION = 'smartup.wsgi.application'
 if not IS_LOCAL:
     DATABASES = {
         'default': {
-            'ENGINE': 'django.db.backends.mysql',
+            'ENGINE': 'django.db.backends.postgresql_psycopg2',
             'NAME': DB_NAME,
             'USER': DB_USER,
             'PASSWORD': DB_PASSWORD,
             'HOST': DB_HOST,
-            "OPTIONS": {
-                "init_command": "SET default_storage_engine=INNODB",
-            }
+            'PORT': DB_PORT
         }
     }
 else:
