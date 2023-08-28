@@ -11,8 +11,8 @@ updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(f"Group Chat ID: {update.message.chat_id}")
 
-def get_keyboard():
-    workplaces = get_workplace_list()
+async def get_keyboard():
+    workplaces = await get_workplace_list()
     keyboard = []
     for place in workplaces:
         name = f'❌ {place.name}'
