@@ -88,9 +88,7 @@ def get_payment_list(branch_id, date_of_payment=None):
     if date_of_payment:
         payment_date = date_of_payment
 
-    payments_query = Payment.objects.filter(
-        Q(date_of_payment=payment_date) & Q(branch__smartup_id=branch_id)
-    )
+    payments_query = Payment.objects.filter(date_of_payment=payment_date)
 
     return payments_query
 

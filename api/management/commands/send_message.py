@@ -99,19 +99,18 @@ def send_messages():
 
 
     for branch in BRANCHES_ID:
-        date_of_payment = date.today() - timedelta(days=1)
-        payments = get_payment_list(branch, date_of_payment)
+        payments = get_payment_list(branch)
         for payment in payments:
             customer = payment.customer
-            
+
             if disabled_workplace(customer):
                 data["disabled"] += 1
                 continue
-            
+
             if not customer.phone:
                 data["invalid"] += 1
                 continue
-            
+
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
