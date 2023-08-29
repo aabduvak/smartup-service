@@ -1,7 +1,7 @@
 import requests
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from datetime import date
+from datetime import date, timedelta
 
 from api.utils import get_payment_list, get_debt_list, disabled_workplace, send_telegram_message
 from api.models import *
@@ -61,7 +61,6 @@ def send_message(phone, message, token):
     headers = {
         "Authorization": f"Bearer {token}"
     }
-
     response = requests.post(url=url, data=data, headers=headers)
 
     if response.status_code == 200:
@@ -100,7 +99,8 @@ def send_messages():
 
 
     for branch in BRANCHES_ID:
-        payments = get_payment_list(branch)
+        date_of_payment = date.today() - timedelta(days=1)
+        payments = get_payment_list(branch, date_of_payment)
         for payment in payments:
             customer = payment.customer
             

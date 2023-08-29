@@ -7,22 +7,11 @@ import requests
 
 from api.utils import (
     create_payments,
-    create_deals
+    create_deals,
+    send_telegram_message
 )
 
 BRANCHES = settings.BRANCHES_ID
-TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
-CHAT_ID = settings.CHAT_ID
-
-def send_message(message):
-    api_url = f'https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage'
-    payload = {
-        'chat_id': CHAT_ID,
-        'text': message,
-        'protect_content': True,
-    }
-
-    response = requests.post(api_url, json=payload)
 
 def error_handler(message):
     today = date.today()
@@ -40,7 +29,7 @@ def error_handler(message):
         + f'📦Созданные товары: {products} шт\n\n' \
         + f'Статус:\n{message} ❌'
 
-    send_message(main)
+    send_telegram_message(main)
 
 def success_handler(status):
     today = date.today()
@@ -58,9 +47,9 @@ def success_handler(status):
         + f'📦  Созданные товары: {products.count()} шт\n\n' \
         + f'Статус:\n{status} ✅'
 
-    send_message(message)
+    send_telegram_message(message)
 
-    uzs_payments = payments.filter(payment_type__currency__name='Base Sum').aggregate(total_amount=Sum('amount'))['total_amount']
+    uzs_payments = payments.filter(payment_type__currency__name='Base SUM').aggregate(total_amount=Sum('amount'))['total_amount']
     if not uzs_payments:
         uzs_payments = 0
     uzs_payments = round(uzs_payments, 2)
@@ -70,7 +59,7 @@ def success_handler(status):
         usd_payments = 0
     usd_payments = round(usd_payments, 2)
 
-    uzs_deals = deals.filter(payment_type__currency__name='SUM').aggregate(total_amount=Sum('total'))['total_amount']
+    uzs_deals = deals.filter(payment_type__currency__name='Base SUM').aggregate(total_amount=Sum('total'))['total_amount']
     if not uzs_deals:
         uzs_deals = 0
     uzs_deals = round(uzs_deals, 2)
@@ -89,7 +78,7 @@ def success_handler(status):
         + f'💳  Сумма платежей: {uzs_payments}\n' \
         + f'🛍  Сумма сделок: {uzs_deals}\n\n' \
         + f'Статус:\n{status} ✅'
-    send_message(message)
+    send_telegram_message(message)
 
 class Command(BaseCommand):
     help = 'Send message to customers who has payment for today'

@@ -1,5 +1,5 @@
-from api.utils import get_workplace_list, toggle_workplace
-from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup
+from api.utils import get_workplace_list, toggle_workplace, get_debt_list
+from telegram import Update, InlineKeyboardButton, InlineKeyboardMarkup, KeyboardButton, ReplyKeyboardMarkup
 from telegram.ext import Updater, CommandHandler, MessageHandler, Filters, CallbackContext, CallbackQueryHandler
 from django.conf import settings
 
@@ -10,6 +10,32 @@ updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
 
 def start(update: Update, context: CallbackContext) -> None:
     update.message.reply_text(f"Group Chat ID: {update.message.chat_id}")
+
+
+
+
+def debt(update: Update, context: CallbackContext) -> None:
+    if update.message.chat_id != int(CHAT_ID):
+        update.message.reply_text(text=f"🚫 У вас недостаточно прав для запуска этой команды")
+        return
+    
+    keyboard = []
+    for place in workplaces:
+        name = f'❌ {place.name}'
+        if place.is_active:
+            name = f'✅ {place.name}'
+
+        button = InlineKeyboardButton(text=name, callback_data=str(place.id))
+
+        keyboard.append([button])
+
+    button = InlineKeyboardButton(text="Готово", callback_data="done")
+    keyboard.append([button])
+    reply_markup = InlineKeyboardMarkup(keyboard)
+
+    update.message.reply_text(text="Список рабочих мест\nНажмите кнопку, чтобы включить/отключить отправку сообщений клиентам на соответствующем рабочем месте или нажмите \"готово\" чтобы выйти", reply_markup=reply_markup)
+
+
 
 def get_keyboard():
     workplaces = get_workplace_list()

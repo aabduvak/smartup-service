@@ -124,7 +124,7 @@ def create_customer(id: str, branch_id=None):
         return None
     
     customer = data['data'][0]
-    print(customer)
+
     if User.objects.filter(smartup_id=customer[0]).exists():
         return User.objects.get(smartup_id=customer[0])
     
