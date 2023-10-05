@@ -152,42 +152,25 @@ def create_customer(id: str, branch_id=None):
         user.save()
     return user
 
-columns = [
-        "person_id",
-        "name",
-        "main_phone",
-        "region_name",
-        "post_address",
-        "ref_code",
-        "state",
-        "room_names",
-        "in_filial_state"
-    ]
-
 def check_customer_data(id: str, user: User, branch_id=None):
     customer = get_customer_from_service(id, branch_id=branch_id)
     
     if customer[1] != user.name:
-        update_customer(id, branch_id)
+        update_customer(customer)
     if customer[2] != user.phone and validate_phone_number(customer[2]):
-        update_customer(id, branch_id)
-    if customer[3] != user.district.name:
-        update_customer(id, branch_id)
+        update_customer(customer)
+    if user.district and customer[3] != user.district.name:
+        update_customer(customer)
     if customer[4] != user.address:
-        update_customer(id, branch_id)
+        update_customer(customer)
     
     workplace_list = customer[7].split(',')
     for workplace in workplace_list:
         if workplace not in user.workplaces.all():
-            update_customer(id, branch_id)
+            update_customer(customer)
     return True
 
-def update_customer(id: str, branch_id=None):
-    customer = get_customer_from_service(id, branch_id)
-
-    if not User.objects.filter(smartup_id=customer[0]).exists():
-        return create_customer(id, branch_id)
-    
+def update_customer(customer):
     phone = customer[2]
     if not validate_phone_number(phone):
         phone = format_phone_number(phone)
