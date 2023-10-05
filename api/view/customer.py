@@ -8,7 +8,7 @@ from datetime import date
 from api.models import User
 from api.serializer.customer import UserSerializer
 from api.serializer.workplace import WorkPlaceSerializer
-from api.utils.customer import create_customer, create_customers
+from api.utils.customer import create_customer, create_customers, check_customer_data
 
 BRANCHES_ID = settings.BRANCHES_ID
 
@@ -32,6 +32,8 @@ class UserDetailView(APIView):
                 return Response(status=404)
         
         user = User.objects.get(smartup_id=smartup_id)
+        for branch in BRANCHES_ID:
+            check_customer_data(smartup_id, user, branch)    
         serializer = UserSerializer(user)
         workplaces_serializer = WorkPlaceSerializer(user.workplaces.all(), many=True)
         

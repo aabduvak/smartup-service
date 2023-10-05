@@ -23,10 +23,10 @@ def error_handler(message):
 
     main = f'Технический отчет 📊\n\n' \
         + f'📅 Дата: {today}\n' \
-        + f'👤 Создано пользователей: {users} шт\n' \
-        + f'💳 Созданные платежи: {payments} шт\n' \
-        + f'🛍 Созданные сделки: {deals} шт\n' \
-        + f'📦Созданные товары: {products} шт\n\n' \
+        + f'Создано пользователей: {users} шт\n' \
+        + f'Созданные платежи: {payments} шт\n' \
+        + f'Созданные сделки: {deals} шт\n' \
+        + f'Созданные товары: {products} шт\n\n' \
         + f'Статус:\n{message} ❌'
 
     send_telegram_message(main)
@@ -35,16 +35,18 @@ def success_handler(status):
     today = date.today()
 
     users = User.objects.filter(created_at__date=today)
+    updated_users = User.objects.filter(updated_at__date=today)
     payments = Payment.objects.filter(created_at__date=today)
     deals = Deal.objects.filter(created_at__date=today)
     products = Product.objects.filter(created_at__date=today)
 
     message = f'Технический отчет 📊\n\n' \
         + f'📅  Дата: {today}\n' \
-        + f'👤  Созданные пользователи: {users.count()} шт\n' \
-        + f'💳  Созданные платежи: {payments.count()} шт\n' \
-        + f'🛍  Созданные сделки: {deals.count()} шт\n' \
-        + f'📦  Созданные товары: {products.count()} шт\n\n' \
+        + f'Созданные пользователи: {users.count()} шт\n' \
+        + f'Обновленные пользователи: {updated_users.count()} шт\n' \
+        + f'Созданные платежи: {payments.count()} шт\n' \
+        + f'Созданные сделки: {deals.count()} шт\n' \
+        + f'Созданные товары: {products.count()} шт\n\n' \
         + f'Статус:\n{status} ✅'
 
     send_telegram_message(message)

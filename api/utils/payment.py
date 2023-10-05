@@ -9,7 +9,7 @@ from django.conf import settings
 from api.models import User, Payment, Currency, PaymentType, Branch
 
 from .get_data import get_data
-from .customer import create_customer
+from .customer import create_customer, check_customer_data
 
 LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD
@@ -62,6 +62,8 @@ def create_payments(branch_id, date):
                 continue
 
         user = User.objects.get(smartup_id=info['customer_id'])
+        check_customer_data(info['customer_id'], user, branch_id)
+        
         payment_type = PaymentType.objects.get(smartup_id=info['payment_type_id'])
         amount =  Decimal(info['amount'])
         base_amount = Decimal(info['base_amount'])

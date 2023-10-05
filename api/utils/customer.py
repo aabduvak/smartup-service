@@ -12,6 +12,33 @@ LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD        
 API_BASE = settings.SMARTUP_URL
 
+def get_customer_from_service(id, branch_id=None):
+    columns = [
+        "person_id",
+        "name",
+        "main_phone",
+        "region_name",
+        "post_address",
+        "ref_code",
+        "state",
+        "room_names",
+        "in_filial_state"
+    ]
+    
+    filter = [
+        "person_id",
+        "=",
+        id
+    ]
+   
+    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, filter=filter, branch_id=branch_id)
+    
+    if data['count'] <= 0:
+        return None
+    
+    customer = data['data'][0]
+    return customer
+
 def create_customers(branch):
     url = f'https://{API_BASE}/b/es/porting+exp$legal_person'
         
@@ -100,30 +127,7 @@ def create_customers(branch):
     return True
 
 def create_customer(id: str, branch_id=None):
-    columns = [
-        "person_id",
-        "name",
-        "main_phone",
-        "region_name",
-        "post_address",
-        "ref_code",
-        "state",
-        "room_names",
-        "in_filial_state"
-    ]
-    
-    filter = [
-        "person_id",
-        "=",
-        id
-    ]
-   
-    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, filter=filter, branch_id=branch_id)
-    
-    if data['count'] <= 0:
-        return None
-    
-    customer = data['data'][0]
+    customer = get_customer_from_service(id, branch_id)
 
     if User.objects.filter(smartup_id=customer[0]).exists():
         return User.objects.get(smartup_id=customer[0])
@@ -143,6 +147,69 @@ def create_customer(id: str, branch_id=None):
     for name in workplace_names:
         if WorkPlace.objects.filter(name=name).exists():
             WorkPlace.objects.get(name=name).customers.add(user)
+    if District.objects.filter(name=customer[3]).exists():
+        user.district = District.objects.filter(name=customer[3]).first()
+        user.save()
+    return user
+
+columns = [
+        "person_id",
+        "name",
+        "main_phone",
+        "region_name",
+        "post_address",
+        "ref_code",
+        "state",
+        "room_names",
+        "in_filial_state"
+    ]
+
+def check_customer_data(id: str, user: User, branch_id=None):
+    customer = get_customer_from_service(id, branch_id=branch_id)
+    
+    if customer[1] != user.name:
+        update_customer(id, branch_id)
+    if customer[2] != user.phone and validate_phone_number(customer[2]):
+        update_customer(id, branch_id)
+    if customer[3] != user.district.name:
+        update_customer(id, branch_id)
+    if customer[4] != user.address:
+        update_customer(id, branch_id)
+    
+    workplace_list = customer[7].split(',')
+    for workplace in workplace_list:
+        if workplace not in user.workplaces.all():
+            update_customer(id, branch_id)
+    return True
+
+def update_customer(id: str, branch_id=None):
+    customer = get_customer_from_service(id, branch_id)
+
+    if not User.objects.filter(smartup_id=customer[0]).exists():
+        return create_customer(id, branch_id)
+    
+    phone = customer[2]
+    if not validate_phone_number(phone):
+        phone = format_phone_number(phone)
+    
+    user = User.objects.get(
+        smartup_id=customer[0]
+    )
+    
+    user.name = customer[1]
+    user.phone = phone
+    user.address = customer[4]
+    user.save()
+    
+    workplaces = user.workplaces.all()
+    for workplace in workplaces:
+        workplace.customers.remove(user)
+    
+    workplace_names = customer[7].split(',')
+    for name in workplace_names:
+        if WorkPlace.objects.filter(name=name).exists():
+            WorkPlace.objects.get(name=name).customers.add(user)
+    
     if District.objects.filter(name=customer[3]).exists():
         user.district = District.objects.filter(name=customer[3]).first()
         user.save()
