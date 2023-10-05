@@ -35,7 +35,7 @@ def success_handler(status):
     today = date.today()
 
     users = User.objects.filter(created_at__date=today)
-    updated_users = User.objects.filter(updated_at__date=today)
+    updated_users = User.objects.filter(updated_at__date=today).exclude(created_at__date=today)
     payments = Payment.objects.filter(created_at__date=today)
     deals = Deal.objects.filter(created_at__date=today)
     products = Product.objects.filter(created_at__date=today)
