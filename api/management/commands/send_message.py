@@ -1,71 +1,28 @@
-import requests
 from django.core.management.base import BaseCommand
 from django.conf import settings
-from datetime import date, timedelta
+from datetime import date
 
 from api.utils import get_payment_list, get_debt_list, disabled_workplace, send_telegram_message
 from api.models import *
+from api.utils.eskiz import get_token, get_balance, delete_token, send_message
 
-ESKIZ_EMAIL = settings.ESKIZ_EMAIL
-ESKIZ_PASSWORD = settings.ESKIZ_PASSWORD
-ESKIZ_URL = settings.ESKIZ_URL
 BRANCHES_ID = settings.BRANCHES_ID
-
-
 STATUS_LIST = ['DELIVRD', 'TRANSMTD', 'WAITING']
 
-def success_handler(status, data):
+def success_handler(status, data, token):
     today = date.today()
-
-    message = f'Отчет от провайдера 📊\n\n' \
+    balance = get_balance(token)['data']['balance']
+    
+    message = f'Отчет от провайдера Eskiz.uz 📊\n\n' \
         + f'📅  Дата: {today}\n\n' \
         + f'Отправленные сообщения: {data["success"]} шт\n' \
         + f'Неверные номера: {data["invalid"]} шт\n' \
         + f'Отключенные рабочие места: {data["disabled"]} шт\n' \
-        + f'Неотправленные сообщения: {data["error"]} шт\n\n' \
+        + f'Неотправленные сообщения: {data["error"]} шт\n' \
+        + f'Текущий баланс: {balance} сум\n\n' \
         + f'Статус:\n{status} ✅'
 
     send_telegram_message(message)
-
-def get_token():
-    url = f'http://{ESKIZ_URL}/auth/login'
-    data = {
-        "email": ESKIZ_EMAIL,
-        "password": ESKIZ_PASSWORD
-    }
-
-    response = requests.post(url=url, data=data)
-    if response.status_code == 200:
-        return response.json()
-    return None
-
-def delete_token(token):
-    url = f'http://{ESKIZ_URL}/auth/invalidate'
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-    response = requests.delete(url=url, headers=headers)
-    return response
-
-
-def send_message(phone, message, token):
-    url = f'http://{ESKIZ_URL}/message/sms/send'
-
-    data = {
-        "mobile_phone": phone,
-        "message": message,
-        "from": "4546",
-    }
-
-    headers = {
-        "Authorization": f"Bearer {token}"
-    }
-    response = requests.post(url=url, data=data, headers=headers)
-
-    if response.status_code == 200:
-        return response.json()
-    return None
 
 def prepare_message(customer, payment, debt):
     currency_name = payment.payment_type.currency.name
@@ -114,13 +71,14 @@ def send_messages():
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
-            state = send_message(customer.phone[1:], message, token)
-            if state and state['status'].upper() in STATUS_LIST:
-                data['success'] += 1
-            else:
-                data['error'] += 1
+            #state = send_message(customer.phone[1:], message, token)
+            #if state and state['status'].upper() in STATUS_LIST:
+            #    data['success'] += 1
+            #else:
+            #    data['error'] += 1
 
-    success_handler('Отправлено сообщение клиентам, у которых есть оплата', data=data)
+    success_handler('Отправлено сообщение клиентам, у которых есть оплата', data, token)
+    delete_token(token)
 
 
 class Command(BaseCommand):
