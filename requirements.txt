@@ -3,7 +3,7 @@ asgiref==3.7.2
 cachetools==4.2.2
 certifi==2023.7.22
 charset-normalizer==3.2.0
-Django==4.2.4
+Django==4.2.7
 django-environ==0.10.0
 djangorestframework==3.14.0
 drf-yasg==1.21.7
