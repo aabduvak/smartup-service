@@ -12,12 +12,12 @@ STATUS_LIST = ['DELIVRD', 'TRANSMTD', 'WAITING']
 def success_handler(status, data, token):
     today = date.today()
     balance = get_balance(token)['data']['balance']
-    
+
     message = f'Отчет от провайдера Eskiz.uz 📊\n\n' \
         + f'📅  Дата: {today}\n\n' \
         + f'Отправленные сообщения: {data["success"]} шт\n' \
         + f'Неверные номера: {data["invalid"]} шт\n' \
-        + f'Отключенные рабочие места: {data["disabled"]} шт\n' \
+        + f'Отключенные клиенты: {data["disabled"]} шт\n' \
         + f'Неотправленные сообщения: {data["error"]} шт\n' \
         + f'Текущий баланс: {balance} сум\n\n' \
         + f'Статус:\n{status} ✅'
