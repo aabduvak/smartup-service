@@ -17,14 +17,15 @@ def get_token():
 		return response.json()
 	return None
 
-def delete_token(token):
-	url = f'http://{ESKIZ_URL}/auth/invalidate'
+# Removed from provider API
+#def delete_token(token):
+#	url = f'http://{ESKIZ_URL}/auth/invalidate'
 
-	headers = {
-		"Authorization": f"Bearer {token}"
-	}
-	response = requests.delete(url=url, headers=headers)
-	return response
+#	headers = {
+#		"Authorization": f"Bearer {token}"
+#	}
+#	response = requests.delete(url=url, headers=headers)
+#	return response
 
 def get_balance(token):
 	url = f'http://{ESKIZ_URL}/user/get-limit'

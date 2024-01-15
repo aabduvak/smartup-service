@@ -4,7 +4,7 @@ from datetime import date
 
 from api.utils import get_payment_list, get_debt_list, disabled_workplace, send_telegram_message
 from api.models import *
-from api.utils.eskiz import get_token, get_balance, delete_token, send_message
+from api.utils.eskiz import get_token, get_balance, send_message
 
 BRANCHES_ID = settings.BRANCHES_ID
 STATUS_LIST = ['DELIVRD', 'TRANSMTD', 'WAITING']
@@ -78,7 +78,6 @@ def send_messages():
             #    data['error'] += 1
 
     success_handler('Отправлено сообщение клиентам, у которых есть оплата', data, token)
-    delete_token(token)
 
 
 class Command(BaseCommand):
