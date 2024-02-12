@@ -29,6 +29,13 @@ def create_workplaces(branch_id):
                     code = workplace[1],
                     name=workplace[2],
                 )
+            else:
+                workplace_instance = WorkPlace.objects.get(smartup_id=workplace[0])
+                if workplace_instance.code != workplace[1] or \
+                    workplace_instance.name != workplace[2]:
+                    workplace_instance.name = str(workplace[2]).strip()
+                    workplace_instance.code = workplace[1]
+                    workplace_instance.save()
         return True
     except:
         return None
@@ -63,6 +70,37 @@ def create_workplace(id, branch_id):
             name=workplace[2]
         )
     return True
+
+def create_workplace_by_name(name: str, branch_id) -> WorkPlace:
+
+    if not id:
+        return None
+
+    filter =  [
+        "name",
+        "=",
+        name
+    ]
+
+    columns = [
+        "room_id",
+        "code",
+        "name"
+    ]
+
+    response = get_data(endpoint='/b/fp/room_list+x&table', columns=columns, filter=filter, branch_id=branch_id)
+    if not response or response['count'] != 1:
+        return None
+
+    workplace = response['data'][0]
+
+    instance = WorkPlace.objects.get_or_create(
+        smartup_id=workplace[0],
+        code = workplace[1],
+        name=workplace[2]
+    )
+    return instance
+
 
 def get_workplace_list():
     workplaces = WorkPlace.objects.all()
