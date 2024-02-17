@@ -145,8 +145,7 @@ def create_customer(id: str, branch_id=None):
     
     workplace_names = customer[7].split(',')
     for name in workplace_names:
-        if WorkPlace.objects.filter(name=name).exists():
-            WorkPlace.objects.get(name=name).customers.add(user)
+        update_customer_workplace(branch_id, user, name)
     if District.objects.filter(name=customer[3]).exists():
         user.district = District.objects.filter(name=customer[3]).first()
         user.save()
@@ -156,55 +155,38 @@ def check_customer_data(id: str, user: User, branch_id=None):
     customer = get_customer_from_service(id, branch_id=branch_id)
     
     if customer[1] != user.name:
-        update_customer_info(customer)
+        update_customer_info(customer, user)
     if customer[2] != user.phone and validate_phone_number(customer[2]):
         update_customer_phone(customer)
     if user.district and customer[3] != user.district.name:
-        update_customer_info(customer)
+        update_customer_info(customer, user)
     if customer[4] != user.address:
-        update_customer_info(customer)
+        update_customer_info(customer, user)
     
     workplace_list = customer[7].split(',')
     for workplace in workplace_list:
         if workplace not in user.workplaces.all():
-            update_customer_workplace(customer, branch_id)
+            update_customer_workplace(branch_id, user, workplace)
     return True
 
-def update_customer_phone(customer):
+def update_customer_phone(customer, user):
     phone = customer[2]
     if not validate_phone_number(phone):
         phone = format_phone_number(phone)
-    
-    user = User.objects.get(
-        smartup_id=customer[0]
-    )
     user.phone = phone
     user.save()
 
-def update_customer_info(customer):
-    user = User.objects.get(
-        smartup_id=customer[0]
-    )
+def update_customer_info(customer, user):
     user.name = customer[1]
     user.address = customer[4]
     
     if District.objects.filter(name=customer[3]).exists():
         user.district = District.objects.filter(name=customer[3]).first()
-    
     user.save()
 
-def update_customer_workplace(customer, branch):
-    user = User.objects.get(
-        smartup_id=customer[0]
-    )
-    workplaces = user.workplaces.all()
-    for workplace in workplaces:
-        workplace.customers.remove(user)
-    
-    workplace_names = customer[7].split(',')
-    for name in workplace_names:
-        if WorkPlace.objects.filter(name=name).exists():
-            WorkPlace.objects.get(name=name).customers.add(user)
-        else:
-            new_workplace = create_workplace_by_name(name, branch)
-            new_workplace.customers.add(user)
+def update_customer_workplace(branch, user, workplace):
+    if WorkPlace.objects.filter(name=workplace).exists():
+        WorkPlace.objects.get(name=workplace).customers.add(user)
+    else:
+        new_workplace = create_workplace_by_name(workplace, branch)
+        new_workplace.customers.add(user)
