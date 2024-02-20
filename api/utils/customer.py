@@ -120,9 +120,9 @@ def create_customers(branch):
             for place in customer_info['workplaces']:
                 
                 if not WorkPlace.objects.filter(smartup_id=place['id']).exists():
-                    if not create_workplace(id=place['id'], branch_id=branch):
-                        continue
-                workplace = WorkPlace.objects.get(smartup_id=place['id'])
+                    workplace =  create_workplace(id=place['id'], branch_id=branch)
+                else:
+                    workplace = WorkPlace.objects.get(smartup_id=place['id'])
                 workplace.customers.add(user)
     return True
 
@@ -164,9 +164,7 @@ def check_customer_data(id: str, user: User, branch_id=None):
         update_customer_info(customer, user)
     
     workplace_list = customer[7].split(',')
-    for workplace in workplace_list:
-        if workplace not in user.workplaces.all():
-            update_customer_workplace(branch_id, user, workplace)
+    update_customer_workplace(branch_id, user, workplace_list)
     return True
 
 def update_customer_phone(customer, user):
@@ -184,9 +182,16 @@ def update_customer_info(customer, user):
         user.district = District.objects.filter(name=customer[3]).first()
     user.save()
 
-def update_customer_workplace(branch, user, workplace):
-    if WorkPlace.objects.filter(name=workplace).exists():
-        WorkPlace.objects.get(name=workplace).customers.add(user)
-    else:
-        new_workplace = create_workplace_by_name(workplace, branch)
-        new_workplace.customers.add(user)
+def update_customer_workplace(branch, user: User, workplace_list: list):
+    user.workplaces.clear()
+    
+    for workplace_name in workplace_list:
+        workplace_name = str(workplace_name).strip()
+        if WorkPlace.objects.filter(name=workplace_name).exists():
+            workplace = WorkPlace.objects.get(name=workplace_name)
+        else:
+            workplace = create_workplace_by_name(workplace_name, branch)
+        
+        if not workplace:
+            return None
+        workplace.customers.add(user)

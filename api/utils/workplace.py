@@ -1,5 +1,3 @@
-from asgiref.sync import sync_to_async
-
 from api.models import WorkPlace
 from .get_data import get_data
 
@@ -40,7 +38,7 @@ def create_workplaces(branch_id):
     except:
         return None
 
-def create_workplace(id, branch_id):
+def create_workplace(id, branch_id) -> WorkPlace:
 
     if not id:
         return None
@@ -63,19 +61,14 @@ def create_workplace(id, branch_id):
 
     workplace = response['data'][0]
 
-    if not WorkPlace.objects.filter(smartup_id=workplace[0]).exists():
-        WorkPlace.objects.create(
-            smartup_id=workplace[0],
-            code = workplace[1],
-            name=workplace[2]
-        )
-    return True
+    instance = WorkPlace.objects.get_or_create(
+        smartup_id=workplace[0],
+        code = workplace[1],
+        name=workplace[2]
+    )
+    return instance
 
 def create_workplace_by_name(name: str, branch_id) -> WorkPlace:
-
-    if not id:
-        return None
-
     filter =  [
         "name",
         "=",

@@ -35,7 +35,6 @@ def success_handler(status):
     today = date.today()
 
     users = User.objects.filter(created_at__date=today)
-    updated_users = User.objects.filter(updated_at__date=today).exclude(created_at__date=today)
     payments = Payment.objects.filter(created_at__date=today)
     deals = Deal.objects.filter(created_at__date=today)
     products = Product.objects.filter(created_at__date=today)
@@ -43,7 +42,6 @@ def success_handler(status):
     message = f'Технический отчет 📊\n\n' \
         + f'📅  Дата: {today}\n' \
         + f'Созданные пользователи: {users.count()} шт\n' \
-        + f'Обновленные пользователи: {updated_users.count()} шт\n' \
         + f'Созданные платежи: {payments.count()} шт\n' \
         + f'Созданные сделки: {deals.count()} шт\n' \
         + f'Созданные товары: {products.count()} шт\n\n' \

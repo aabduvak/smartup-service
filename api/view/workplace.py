@@ -24,8 +24,7 @@ class WorkPlaceDetailView(APIView):
         
         if not WorkPlace.objects.filter(smartup_id=smartup_id).exists():
             for branch in BRANCHES:
-                if create_workplace(id=smartup_id, branch_id=branch):
-                    break
+                create_workplace(id=smartup_id, branch_id=branch)
 
         if not WorkPlace.objects.filter(smartup_id=smartup_id).exists():
             return Response(status=404)
