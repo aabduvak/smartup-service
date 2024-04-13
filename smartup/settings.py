@@ -51,6 +51,7 @@ BRANCHES_ID = env.list('BRANCHES_ID', default=[])
 ESKIZ_EMAIL = env('ESKIZ_EMAIL')
 ESKIZ_PASSWORD = env('ESKIZ_PASSWORD')
 ESKIZ_URL = env('ESKIZ_URL')
+ESKIZ_DEFAULT_NICK = env('ESKIZ_DEFAULT_NICK')
 
 # Database credentials
 DB_HOST = env('DB_HOST')

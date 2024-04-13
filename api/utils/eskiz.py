@@ -4,18 +4,19 @@ from django.conf import settings
 ESKIZ_EMAIL = settings.ESKIZ_EMAIL
 ESKIZ_PASSWORD = settings.ESKIZ_PASSWORD
 ESKIZ_URL = settings.ESKIZ_URL
+ESKIZ_DEFAULT_NICK = settings.ESKIZ_DEFAULT_NICK
 
 def get_token():
-	url = f'http://{ESKIZ_URL}/auth/login'
-	data = {
-		"email": ESKIZ_EMAIL,
-		"password": ESKIZ_PASSWORD
-	}
+    url = f'http://{ESKIZ_URL}/auth/login'
+    data = {
+        "email": ESKIZ_EMAIL,
+        "password": ESKIZ_PASSWORD
+    }
 
-	response = requests.post(url=url, data=data)
-	if response.status_code == 200:
-		return response.json()
-	return None
+    response = requests.post(url=url, data=data)
+    if response.status_code == 200:
+        return response.json()
+    return None
 
 # Removed from provider API
 #def delete_token(token):
@@ -28,21 +29,36 @@ def get_token():
 #	return response
 
 def get_balance(token):
-	url = f'http://{ESKIZ_URL}/user/get-limit'
+    url = f'http://{ESKIZ_URL}/user/get-limit'
 
-	headers = {
-		"Authorization": f"Bearer {token}"
-	}
-	response = requests.get(url=url, headers=headers)
-	return response.json()
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    response = requests.get(url=url, headers=headers)
+    return response.json()
 
-def send_message(phone, message, token):
+def get_nickname(token: str) -> str:
+    url = f'http://{ESKIZ_URL}/nick/me'
+
+    headers = {
+        "Authorization": f"Bearer {token}"
+    }
+    response = requests.get(url=url, headers=headers)
+
+    if response.status_code == 200:
+        nick_list = response.json()
+        if len(nick_list) == 0:
+            return ESKIZ_DEFAULT_NICK
+        return response.json()[0]
+    return ESKIZ_DEFAULT_NICK
+
+def send_message(phone, message, token, nick):
     url = f'http://{ESKIZ_URL}/message/sms/send'
 
     data = {
         "mobile_phone": phone,
         "message": message,
-        "from": "4546",
+        "from": nick,
     }
 
     headers = {
@@ -53,3 +69,4 @@ def send_message(phone, message, token):
     if response.status_code == 200:
         return response.json()
     return None
+

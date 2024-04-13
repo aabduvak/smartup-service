@@ -4,7 +4,7 @@ from datetime import date
 
 from api.utils import get_payment_list, get_debt_list, disabled_workplace, send_telegram_message
 from api.models import *
-from api.utils.eskiz import get_token, get_balance, send_message
+from api.utils.eskiz import get_token, get_balance, send_message, get_nickname
 
 BRANCHES_ID = settings.BRANCHES_ID
 STATUS_LIST = ['DELIVRD', 'TRANSMTD', 'WAITING']
@@ -47,6 +47,8 @@ def send_messages():
         return # Invalid token
 
     token = token['data']['token']
+    nick = get_nickname(token)
+
     data = {
         'success': 0,
         'error': 0,
@@ -71,7 +73,7 @@ def send_messages():
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
-            state = send_message(customer.phone[1:], message, token)
+            state = send_message(customer.phone[1:], message, token, nick)
             if state and state['status'].upper() in STATUS_LIST:
                 data['success'] += 1
             else:
