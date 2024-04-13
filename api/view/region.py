@@ -9,13 +9,16 @@ from api.serializer.region import RegionSerializer, CitySerializer, DistrictSeri
 from api.models import Region, City, District
 from api.utils.places import create_regions, create_cities, create_districts
 
+
 class RegionListView(ListAPIView):
     queryset = Region.objects.all()
     serializer_class = RegionSerializer
 
+
 class CityListView(ListAPIView):
     queryset = City.objects.all()
     serializer_class = CitySerializer
+
 
 class DistrictListView(ListAPIView):
     queryset = District.objects.all()
@@ -23,34 +26,57 @@ class DistrictListView(ListAPIView):
 
 
 class CreateRegionsView(APIView):
-    permission_classes = [IsAdminUser,]
+    permission_classes = [
+        IsAdminUser,
+    ]
+
     def post(self, request):
         if not create_regions():
-            return Response({'status':'error', 'message': 'error occured while creating regions'}, status=500)
-        
+            return Response(
+                {"status": "error", "message": "error occured while creating regions"},
+                status=500,
+            )
+
         today = date.today()
-        
+
         regions = Region.objects.filter(created_at__date=today)
         serializer = RegionSerializer(regions, many=True)
         return Response(serializer.data, status=200)
 
+
 class CreateCitiesView(APIView):
-    permission_classes = [IsAdminUser,]
+    permission_classes = [
+        IsAdminUser,
+    ]
+
     def post(self, request):
         if not create_cities():
-            return Response({'status':'error', 'message': 'error occured while creating cities'}, status=500)
-        
+            return Response(
+                {"status": "error", "message": "error occured while creating cities"},
+                status=500,
+            )
+
         today = date.today()
 
         cities = City.objects.filter(created_at__date=today)
         serializer = CitySerializer(cities, many=True)
         return Response(serializer.data, status=200)
 
+
 class CreateDistrictsView(APIView):
-    permission_classes = [IsAdminUser,]
+    permission_classes = [
+        IsAdminUser,
+    ]
+
     def post(self, request):
         if not create_districts():
-            return Response({'status':'error', 'message': 'error occured while creating districts'}, status=500)
+            return Response(
+                {
+                    "status": "error",
+                    "message": "error occured while creating districts",
+                },
+                status=500,
+            )
 
         today = date.today()
 

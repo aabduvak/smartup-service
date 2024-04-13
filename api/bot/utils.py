@@ -8,9 +8,11 @@ ESKIZ_PASSWORD = settings.ESKIZ_PASSWORD
 ESKIZ_URL = settings.ESKIZ_URL
 BRANCHES_ID = settings.BRANCHES_ID
 
-def is_valid_chat(update: Update):
-	if update.message.chat_id != int(CHAT_ID):
-		update.message.reply_text(text=f"🚫 У вас недостаточно прав для запуска этой команды")
-		return False
-	return True
 
+def is_valid_chat(update: Update):
+    if update.message.chat_id != int(CHAT_ID):
+        update.message.reply_text(
+            text=f"🚫 У вас недостаточно прав для запуска этой команды"
+        )
+        return False
+    return True

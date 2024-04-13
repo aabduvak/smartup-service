@@ -7,17 +7,22 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0009_deal_date_of_order_deal_date_of_shipment_and_more'),
+        ("api", "0009_deal_date_of_order_deal_date_of_shipment_and_more"),
     ]
 
     operations = [
         migrations.RemoveField(
-            model_name='deal',
-            name='payment',
+            model_name="deal",
+            name="payment",
         ),
         migrations.AddField(
-            model_name='deal',
-            name='payment_type',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='api.paymenttype'),
+            model_name="deal",
+            name="payment_type",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="api.paymenttype",
+            ),
         ),
     ]

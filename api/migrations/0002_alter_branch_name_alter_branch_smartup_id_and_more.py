@@ -7,63 +7,67 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0001_initial'),
+        ("api", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='branch',
-            name='name',
+            model_name="branch",
+            name="name",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='branch',
-            name='smartup_id',
+            model_name="branch",
+            name="smartup_id",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='deal',
-            name='customer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.user'),
+            model_name="deal",
+            name="customer",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="api.user"
+            ),
         ),
         migrations.AlterField(
-            model_name='deal',
-            name='smartup_id',
+            model_name="deal",
+            name="smartup_id",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='deal',
-            name='total',
+            model_name="deal",
+            name="total",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='customer',
-            field=models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='api.user'),
+            model_name="payment",
+            name="customer",
+            field=models.ForeignKey(
+                on_delete=django.db.models.deletion.CASCADE, to="api.user"
+            ),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='smartup_id',
+            model_name="payment",
+            name="smartup_id",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='code',
+            model_name="product",
+            name="code",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='product',
-            name='name',
+            model_name="product",
+            name="name",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='name',
+            model_name="user",
+            name="name",
             field=models.CharField(max_length=255),
         ),
         migrations.AlterField(
-            model_name='user',
-            name='smartup_id',
+            model_name="user",
+            name="smartup_id",
             field=models.CharField(max_length=255),
         ),
     ]

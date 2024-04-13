@@ -7,13 +7,18 @@ import django.db.models.deletion
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0006_remove_payment_currency_payment_payment_type'),
+        ("api", "0006_remove_payment_currency_payment_payment_type"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='payment',
-            name='branch',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='api.branch'),
+            model_name="payment",
+            name="branch",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="api.branch",
+            ),
         ),
     ]

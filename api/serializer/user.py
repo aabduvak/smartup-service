@@ -4,9 +4,11 @@ from django.contrib.auth import get_user_model
 
 User = get_user_model()
 
+
 class TokenSerializer(serializers.Serializer):
     token = serializers.CharField(source="key")
     key = serializers.CharField(write_only=True)
+
 
 class AuthSerializer(serializers.Serializer):
     email = serializers.EmailField()

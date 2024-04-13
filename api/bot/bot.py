@@ -10,6 +10,7 @@ CHAT_ID = settings.CHAT_ID
 
 updater = Updater(token=TELEGRAM_TOKEN, use_context=True)
 
+
 def main():
     dp = updater.dispatcher
 

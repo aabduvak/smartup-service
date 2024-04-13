@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0002_alter_branch_name_alter_branch_smartup_id_and_more'),
+        ("api", "0002_alter_branch_name_alter_branch_smartup_id_and_more"),
     ]
 
     operations = [
         migrations.AddField(
-            model_name='city',
-            name='smartup_id',
+            model_name="city",
+            name="smartup_id",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='district',
-            name='smartup_id',
+            model_name="district",
+            name="smartup_id",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
         migrations.AddField(
-            model_name='region',
-            name='smartup_id',
+            model_name="region",
+            name="smartup_id",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

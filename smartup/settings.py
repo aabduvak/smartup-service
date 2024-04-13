@@ -36,77 +36,77 @@ if os.path.isfile(env_file):
 SECRET_KEY = env("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = env('DEBUG', default=False)
-IS_LOCAL = env('IS_LOCAL', default=True)
+DEBUG = env("DEBUG", default=False)
+IS_LOCAL = env("IS_LOCAL", default=True)
 
-ALLOWED_HOSTS = env.list('ALLOWED_HOSTS', default=[])
+ALLOWED_HOSTS = env.list("ALLOWED_HOSTS", default=[])
 
 # SmartUp credentials
-SMARTUP_LOGIN = env('SMARTUP_LOGIN')
-SMARTUP_PASSWORD = env('SMARTUP_PASSWORD')
-SMARTUP_URL = env('SMARTUP_URL')
-BRANCHES_ID = env.list('BRANCHES_ID', default=[])
+SMARTUP_LOGIN = env("SMARTUP_LOGIN")
+SMARTUP_PASSWORD = env("SMARTUP_PASSWORD")
+SMARTUP_URL = env("SMARTUP_URL")
+BRANCHES_ID = env.list("BRANCHES_ID", default=[])
 
 # Eskiz.uz credentials (SMS Provider)
-ESKIZ_EMAIL = env('ESKIZ_EMAIL')
-ESKIZ_PASSWORD = env('ESKIZ_PASSWORD')
-ESKIZ_URL = env('ESKIZ_URL')
-ESKIZ_DEFAULT_NICK = env('ESKIZ_DEFAULT_NICK')
+ESKIZ_EMAIL = env("ESKIZ_EMAIL")
+ESKIZ_PASSWORD = env("ESKIZ_PASSWORD")
+ESKIZ_URL = env("ESKIZ_URL")
+ESKIZ_DEFAULT_NICK = env("ESKIZ_DEFAULT_NICK")
 
 # Database credentials
-DB_HOST = env('DB_HOST')
-DB_USER = env('DB_USER')
-DB_PASSWORD = env('DB_PASSWORD')
-DB_NAME = env('DB_NAME')
-DB_PORT = env('DB_PORT')
+DB_HOST = env("DB_HOST")
+DB_USER = env("DB_USER")
+DB_PASSWORD = env("DB_PASSWORD")
+DB_NAME = env("DB_NAME")
+DB_PORT = env("DB_PORT")
 
-TELEGRAM_TOKEN = env('TELEGRAM_TOKEN')
-CHAT_ID = env('CHAT_ID')
+TELEGRAM_TOKEN = env("TELEGRAM_TOKEN")
+CHAT_ID = env("CHAT_ID")
 
 # Application definition
 
 INSTALLED_APPS = [
-    'django.contrib.admin',
-    'django.contrib.auth',
-    'django.contrib.contenttypes',
-    'django.contrib.sessions',
-    'django.contrib.messages',
-    'django.contrib.staticfiles',
-    'api.apps.ApiConfig',
-    'rest_framework',
-    'drf_yasg',
-    'rest_framework.authtoken'
+    "django.contrib.admin",
+    "django.contrib.auth",
+    "django.contrib.contenttypes",
+    "django.contrib.sessions",
+    "django.contrib.messages",
+    "django.contrib.staticfiles",
+    "api.apps.ApiConfig",
+    "rest_framework",
+    "drf_yasg",
+    "rest_framework.authtoken",
 ]
 
 MIDDLEWARE = [
-    'django.middleware.security.SecurityMiddleware',
-    'django.contrib.sessions.middleware.SessionMiddleware',
-    'django.middleware.common.CommonMiddleware',
-    'django.middleware.csrf.CsrfViewMiddleware',
-    'django.contrib.auth.middleware.AuthenticationMiddleware',
-    'django.contrib.messages.middleware.MessageMiddleware',
-    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    "django.middleware.security.SecurityMiddleware",
+    "django.contrib.sessions.middleware.SessionMiddleware",
+    "django.middleware.common.CommonMiddleware",
+    "django.middleware.csrf.CsrfViewMiddleware",
+    "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.messages.middleware.MessageMiddleware",
+    "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
-ROOT_URLCONF = 'smartup.urls'
+ROOT_URLCONF = "smartup.urls"
 
 TEMPLATES = [
     {
-        'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
-        'APP_DIRS': True,
-        'OPTIONS': {
-            'context_processors': [
-                'django.template.context_processors.debug',
-                'django.template.context_processors.request',
-                'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
+        "BACKEND": "django.template.backends.django.DjangoTemplates",
+        "DIRS": [],
+        "APP_DIRS": True,
+        "OPTIONS": {
+            "context_processors": [
+                "django.template.context_processors.debug",
+                "django.template.context_processors.request",
+                "django.contrib.auth.context_processors.auth",
+                "django.contrib.messages.context_processors.messages",
             ],
         },
     },
 ]
 
-WSGI_APPLICATION = 'smartup.wsgi.application'
+WSGI_APPLICATION = "smartup.wsgi.application"
 
 
 # Database
@@ -114,20 +114,20 @@ WSGI_APPLICATION = 'smartup.wsgi.application'
 
 if not IS_LOCAL:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.postgresql_psycopg2',
-            'NAME': DB_NAME,
-            'USER': DB_USER,
-            'PASSWORD': DB_PASSWORD,
-            'HOST': DB_HOST,
-            'PORT': DB_PORT
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": DB_NAME,
+            "USER": DB_USER,
+            "PASSWORD": DB_PASSWORD,
+            "HOST": DB_HOST,
+            "PORT": DB_PORT,
         }
     }
 else:
     DATABASES = {
-        'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': BASE_DIR + '/' + 'db.sqlite3',
+        "default": {
+            "ENGINE": "django.db.backends.sqlite3",
+            "NAME": BASE_DIR + "/" + "db.sqlite3",
         }
     }
 
@@ -136,16 +136,16 @@ else:
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator',
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator',
+        "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.CommonPasswordValidator",
     },
     {
-        'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
+        "NAME": "django.contrib.auth.password_validation.NumericPasswordValidator",
     },
 ]
 
@@ -153,9 +153,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = "en-us"
 
-TIME_ZONE = 'Asia/Tashkent'
+TIME_ZONE = "Asia/Tashkent"
 
 USE_I18N = True
 
@@ -163,17 +163,15 @@ USE_TZ = True
 
 
 SWAGGER_SETTINGS = {
-    'DEFAULT_INFO': 'smartup.urls.api_info',  # Reference to your API info dictionary
-    'SECURITY_DEFINITIONS': {
-        'Basic': {
-            'type': 'basic'
+    "DEFAULT_INFO": "smartup.urls.api_info",  # Reference to your API info dictionary
+    "SECURITY_DEFINITIONS": {
+        "Basic": {"type": "basic"},
+        "Bearer": {
+            "type": "apiKey",
+            "name": "Authorization",  # Token <value>
+            "in": "header",
         },
-        'Bearer': {
-            'type': 'apiKey',
-            'name': 'Authorization', # Token <value>
-            'in': 'header'
-        }
-    }
+    },
 }
 
 REST_FRAMEWORK = {
@@ -190,10 +188,10 @@ REST_FRAMEWORK = {
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
-STATIC_ROOT = 'static/'
+STATIC_URL = "static/"
+STATIC_ROOT = "static/"
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
 
-DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"

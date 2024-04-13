@@ -12,6 +12,7 @@ LOGIN = settings.SMARTUP_LOGIN
 PASSWORD = settings.SMARTUP_PASSWORD
 API_BASE = settings.SMARTUP_URL
 
+
 def get_customer_from_service(id, branch_id=None):
     columns = [
         "person_id",
@@ -22,25 +23,27 @@ def get_customer_from_service(id, branch_id=None):
         "ref_code",
         "state",
         "room_names",
-        "in_filial_state"
+        "in_filial_state",
     ]
 
-    filter = [
-        "person_id",
-        "=",
-        id
-    ]
+    filter = ["person_id", "=", id]
 
-    data = get_data('/b/ref/legal_person/legal_person_list&table', columns=columns, filter=filter, branch_id=branch_id)
+    data = get_data(
+        "/b/ref/legal_person/legal_person_list&table",
+        columns=columns,
+        filter=filter,
+        branch_id=branch_id,
+    )
 
-    if data['count'] <= 0:
+    if data["count"] <= 0:
         return None
 
-    customer = data['data'][0]
+    customer = data["data"][0]
     return customer
 
+
 def create_customers(branch):
-    url = f'https://{API_BASE}/b/es/porting+exp$legal_person'
+    url = f"https://{API_BASE}/b/es/porting+exp$legal_person"
 
     xml_data = f"""
         <?xml version="1.0" encoding="utf-8"?>
@@ -55,7 +58,7 @@ def create_customers(branch):
     xml_data = xml_data.strip()
 
     headers = {
-        'Content-Type': 'application/xml',
+        "Content-Type": "application/xml",
     }
 
     response = requests.post(url, data=xml_data, headers=headers)
@@ -88,43 +91,48 @@ def create_customers(branch):
             "id": customer_id,
             "district": district,
             "address": address,
-            "workplaces": []
+            "workplaces": [],
         }
 
-        parent = customer.find('РабочиеМестоКонтрагента')
+        parent = customer.find("РабочиеМестоКонтрагента")
         if parent:
             workplaces = parent.findall("РабочееМесто")
             for workplace in workplaces:
-                customer_info["workplaces"].append({
-                    'id': workplace.find('ИдРабочегеМесто').text,
-                    'code': workplace.find('КодРабочегеМесто').text,
-                    'name': workplace.find('НазваниеРабочегеМесто').text
-                })
+                customer_info["workplaces"].append(
+                    {
+                        "id": workplace.find("ИдРабочегеМесто").text,
+                        "code": workplace.find("КодРабочегеМесто").text,
+                        "name": workplace.find("НазваниеРабочегеМесто").text,
+                    }
+                )
 
         if customer_info["phone"] and not validate_phone_number(customer_info["phone"]):
             customer_info["phone"] = format_phone_number(customer_info["phone"])
 
         user = User.objects.create(
-            smartup_id=customer_info['id'],
-            name=customer_info['name'],
+            smartup_id=customer_info["id"],
+            name=customer_info["name"],
             phone=customer_info["phone"],
-            address=customer_info["address"]
+            address=customer_info["address"],
         )
 
-        if customer_info['district'] and District.objects.filter(name=customer_info['district']):
-            district = District.objects.filter(name=customer_info['district']).first()
+        if customer_info["district"] and District.objects.filter(
+            name=customer_info["district"]
+        ):
+            district = District.objects.filter(name=customer_info["district"]).first()
             user.district = district
             user.save()
 
-        if len(customer_info['workplaces']) > 0:
-            for place in customer_info['workplaces']:
+        if len(customer_info["workplaces"]) > 0:
+            for place in customer_info["workplaces"]:
 
-                if not WorkPlace.objects.filter(smartup_id=place['id']).exists():
-                    workplace =  create_workplace(id=place['id'], branch_id=branch)
+                if not WorkPlace.objects.filter(smartup_id=place["id"]).exists():
+                    workplace = create_workplace(id=place["id"], branch_id=branch)
                 else:
-                    workplace = WorkPlace.objects.get(smartup_id=place['id'])
+                    workplace = WorkPlace.objects.get(smartup_id=place["id"])
                 workplace.customers.add(user)
     return True
+
 
 def create_customer(id: str, branch_id=None):
     customer = get_customer_from_service(id, branch_id)
@@ -137,19 +145,17 @@ def create_customer(id: str, branch_id=None):
         phone = format_phone_number(phone)
 
     user = User.objects.create(
-        smartup_id=customer[0],
-        name=customer[1],
-        phone=phone,
-        address=customer[4]
+        smartup_id=customer[0], name=customer[1], phone=phone, address=customer[4]
     )
 
-    workplace_names = customer[7].split(',')
+    workplace_names = customer[7].split(",")
     for name in workplace_names:
         update_customer_workplace(branch_id, user, name)
     if District.objects.filter(name=customer[3]).exists():
         user.district = District.objects.filter(name=customer[3]).first()
         user.save()
     return user
+
 
 def check_customer_data(id: str, user: User, branch_id=None):
     customer = get_customer_from_service(id, branch_id=branch_id)
@@ -163,9 +169,10 @@ def check_customer_data(id: str, user: User, branch_id=None):
     if customer[4] != user.address:
         update_customer_info(customer, user)
 
-    workplace_list = customer[7].split(',')
+    workplace_list = customer[7].split(",")
     update_customer_workplace(branch_id, user, workplace_list)
     return True
+
 
 def update_customer_phone(customer, user):
     phone = customer[2]
@@ -174,6 +181,7 @@ def update_customer_phone(customer, user):
     user.phone = phone
     user.save()
 
+
 def update_customer_info(customer, user):
     user.name = customer[1]
     user.address = customer[4]
@@ -181,6 +189,7 @@ def update_customer_info(customer, user):
     if District.objects.filter(name=customer[3]).exists():
         user.district = District.objects.filter(name=customer[3]).first()
     user.save()
+
 
 def update_customer_workplace(branch, user: User, workplace_list: list):
     user.workplaces.clear()

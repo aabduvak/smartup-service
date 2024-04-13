@@ -4,10 +4,14 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import AllowAny
 
 from api.serializer.user import TokenSerializer, AuthSerializer
+
+
 class AuthView(APIView):
-    permission_classes = [AllowAny,]
+    permission_classes = [
+        AllowAny,
+    ]
     serializer_class = AuthSerializer
-    
+
     def post(self, request):
 
         serializer = self.serializer_class(
@@ -15,7 +19,7 @@ class AuthView(APIView):
         )
         if serializer.is_valid(raise_exception=True):
             user = serializer.validated_data["user"]
-            
+
             (token, _) = Token.objects.get_or_create(user=user)
 
             if token:

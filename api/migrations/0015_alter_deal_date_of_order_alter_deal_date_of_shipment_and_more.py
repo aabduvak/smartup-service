@@ -6,23 +6,23 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0014_alter_product_brand'),
+        ("api", "0014_alter_product_brand"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='deal',
-            name='date_of_order',
+            model_name="deal",
+            name="date_of_order",
             field=models.DateField(),
         ),
         migrations.AlterField(
-            model_name='deal',
-            name='date_of_shipment',
+            model_name="deal",
+            name="date_of_shipment",
             field=models.DateField(),
         ),
         migrations.AlterField(
-            model_name='payment',
-            name='date_of_payment',
+            model_name="payment",
+            name="date_of_payment",
             field=models.DateField(),
         ),
     ]

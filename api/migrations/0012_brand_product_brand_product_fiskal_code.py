@@ -8,32 +8,45 @@ import uuid
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('api', '0011_remove_product_price_orderdetails_currency'),
+        ("api", "0011_remove_product_price_orderdetails_currency"),
     ]
 
     operations = [
         migrations.CreateModel(
-            name='Brand',
+            name="Brand",
             fields=[
-                ('created_at', models.DateTimeField(auto_now_add=True)),
-                ('updated_at', models.DateTimeField(auto_now=True)),
-                ('is_active', models.BooleanField(default=True)),
-                ('id', models.UUIDField(default=uuid.uuid4, primary_key=True, serialize=False, unique=True)),
-                ('name', models.CharField(max_length=255)),
-                ('smartup_id', models.CharField(max_length=255)),
+                ("created_at", models.DateTimeField(auto_now_add=True)),
+                ("updated_at", models.DateTimeField(auto_now=True)),
+                ("is_active", models.BooleanField(default=True)),
+                (
+                    "id",
+                    models.UUIDField(
+                        default=uuid.uuid4,
+                        primary_key=True,
+                        serialize=False,
+                        unique=True,
+                    ),
+                ),
+                ("name", models.CharField(max_length=255)),
+                ("smartup_id", models.CharField(max_length=255)),
             ],
             options={
-                'abstract': False,
+                "abstract": False,
             },
         ),
         migrations.AddField(
-            model_name='product',
-            name='brand',
-            field=models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.SET_NULL, to='api.branch'),
+            model_name="product",
+            name="brand",
+            field=models.ForeignKey(
+                blank=True,
+                null=True,
+                on_delete=django.db.models.deletion.SET_NULL,
+                to="api.branch",
+            ),
         ),
         migrations.AddField(
-            model_name='product',
-            name='fiskal_code',
+            model_name="product",
+            name="fiskal_code",
             field=models.CharField(blank=True, max_length=255, null=True),
         ),
     ]

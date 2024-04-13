@@ -5,8 +5,9 @@ import asyncio
 
 TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
 
+
 class Command(BaseCommand):
-    help = 'Send message to customers who has payment for today'
+    help = "Send message to customers who has payment for today"
 
     def handle(self, *args, **options):
         main()

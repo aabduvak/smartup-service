@@ -11,18 +11,20 @@ from api.utils.deal import create_deals
 
 BRANCHES_ID = settings.BRANCHES_ID
 
+
 class DealListView(ListAPIView):
     serializer_class = DealSerializer
     queryset = Deal.objects.all()
+
 
 class DealDetailView(APIView):
     def get(self, request, smartup_id):
         if not smartup_id:
             return Response(status=400)
-        
+
         if not Deal.objects.filter(smartup_id=smartup_id).exists():
             return Response(status=404)
-        
+
         deal = Deal.objects.get(smartup_id=smartup_id)
         details = OrderDetails.objects.filter(deal=deal)
         serializer = DealSerializer(deal)
@@ -36,30 +38,40 @@ class DealDetailView(APIView):
                 "quantity": detail.quantity,
                 "price": detail.unit_price,
             }
-            
+
             products.append(product)
 
-        data['products'] = products
+        data["products"] = products
         return Response(data)
 
+
 class CreateDealView(APIView):
-    permission_classes = [IsAdminUser,] 
+    permission_classes = [
+        IsAdminUser,
+    ]
+
     def post(self, request):
         branches = BRANCHES_ID
-        date_deal = datetime.now().strftime('%d.%m.%Y')
-        
-        if 'branch' in request.data:
-            branches = [request.data['branch']]
-        
-        if 'date' in request.data:
-            date_deal = request.data['date']
-            
+        date_deal = datetime.now().strftime("%d.%m.%Y")
+
+        if "branch" in request.data:
+            branches = [request.data["branch"]]
+
+        if "date" in request.data:
+            date_deal = request.data["date"]
+
         for branch in branches:
             if not create_deals(branch, date_deal):
-                return Response({'status':'error', 'message': 'error occured while creating deals'}, status=500)
-        
+                return Response(
+                    {
+                        "status": "error",
+                        "message": "error occured while creating deals",
+                    },
+                    status=500,
+                )
+
         today = date.today()
-        
+
         deals = Deal.objects.filter(created_at__date=today)
         serializer = DealSerializer(deals, many=True)
-        return Response({'status':'success', 'result': serializer.data}, status=200)
+        return Response({"status": "success", "result": serializer.data}, status=200)
