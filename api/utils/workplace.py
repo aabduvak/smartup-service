@@ -2,7 +2,7 @@ from api.models import WorkPlace
 from .get_data import get_data
 
 
-def create_workplaces(branch_id):
+def create_workplaces(branch_id: str):
     columns = ["room_id", "code", "name"]
 
     filter = ["state", "=", "A"]
@@ -39,7 +39,7 @@ def create_workplaces(branch_id):
         return None
 
 
-def create_workplace(id, branch_id) -> WorkPlace:
+def create_workplace(id: str, branch_id: str) -> WorkPlace:
 
     if not id:
         return None
@@ -87,16 +87,16 @@ def create_workplace_by_name(name: str, branch_id) -> WorkPlace:
     return instance
 
 
-def get_workplace_list():
+def get_workplace_list() -> list[WorkPlace]:
     workplaces = WorkPlace.objects.all()
     return workplaces
 
 
-def get_disabled_workplace_list():
+def get_disabled_workplace_list() -> list[WorkPlace]:
     return WorkPlace.objects.filter(is_active=False)
 
 
-def disabled_workplace(customer):
+def disabled_workplace(customer) -> bool:
     blacklist = get_disabled_workplace_list()
     workplaces = customer.workplaces.all()
     for workplace in workplaces:
@@ -105,7 +105,7 @@ def disabled_workplace(customer):
     return False
 
 
-def toggle_workplace(id):
+def toggle_workplace(id: str):
     if not id:
         return None
 

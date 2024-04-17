@@ -20,7 +20,7 @@ def create_brands():
     return True
 
 
-def create_product(code: str):
+def create_product(code: str) -> Product:
     columns = ["product_id", "code", "name", "ikpu", "barcodes", "producer_name"]
 
     filter = ["search_code", "search", f"%{code}%"]
@@ -53,7 +53,7 @@ def create_product(code: str):
     return product
 
 
-def create_products(branch):
+def create_products(branch: str):
     products = get_json_data(endpoint="/b/es/porting+exp$se_product", branch=branch)
 
     if not products:

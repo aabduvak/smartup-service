@@ -16,7 +16,7 @@ BRANCHES_ID = settings.BRANCHES_ID
 STATUS_LIST = ["DELIVRD", "TRANSMTD", "WAITING"]
 
 
-def success_handler(status, data, token):
+def success_handler(status: str, data: dict, token: str):
     today = date.today()
     balance = get_balance(token)["data"]["balance"]
 
@@ -87,18 +87,18 @@ def send_messages():
                 data["disabled"] += 1
                 continue
 
-            if not customer.phone:
-                data["invalid"] += 1
-                continue
+            # if not customer.phone:
+            #    data["invalid"] += 1
+            #    continue
 
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
-            state = send_message(customer.phone[1:], message, token, nick)
-            if state and state["status"].upper() in STATUS_LIST:
-                data["success"] += 1
-            else:
-                data["error"] += 1
+            # state = send_message(customer.phone[1:], message, token, nick)
+            # if state and state["status"].upper() in STATUS_LIST:
+            #    data["success"] += 1
+            # else:
+            #    data["error"] += 1
 
     success_handler("Отправлено сообщение клиентам, у которых есть оплата", data, token)
 

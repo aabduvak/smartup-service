@@ -8,7 +8,7 @@ PASSWORD = settings.SMARTUP_PASSWORD
 API_BASE = settings.SMARTUP_URL
 
 
-def get_data(endpoint: str, columns, limit=100, offset=0, **kwargs):
+def get_data(endpoint: str, columns: list[str], limit=100, offset=0, **kwargs):
     session = obtain_token()
     if not session:
         return None
@@ -53,7 +53,7 @@ def get_data(endpoint: str, columns, limit=100, offset=0, **kwargs):
     return None
 
 
-def get_json_data(endpoint: str, branch, date=None):
+def get_json_data(endpoint: str, branch: str, date=None):
     url = f"https://{API_BASE}" + endpoint
     credentials = {"logon": {"login": LOGIN, "password": PASSWORD, "filial_id": branch}}
 
@@ -64,7 +64,3 @@ def get_json_data(endpoint: str, branch, date=None):
     if response["status"] == "success":
         return response["result"]
     return None
-
-
-def get_xml_data():
-    pass

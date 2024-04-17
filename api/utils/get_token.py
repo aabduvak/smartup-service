@@ -6,7 +6,7 @@ PASSWORD = settings.SMARTUP_PASSWORD
 API_BASE = settings.SMARTUP_URL
 
 
-def obtain_token():
+def obtain_token() -> str:
     url = f"https://{API_BASE}/b/anor/s$logon"
 
     data = {"login": LOGIN, "password": PASSWORD}

@@ -44,7 +44,7 @@ def create_deal_details(data):
     return True
 
 
-def create_deals(branch_id, date):
+def create_deals(branch_id: str, date: str):
 
     url = f"https://{API_BASE}/b/es/porting+exp$deal"
 

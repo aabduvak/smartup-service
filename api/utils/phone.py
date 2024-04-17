@@ -1,12 +1,12 @@
 import re
 
 
-def validate_phone_number(phone_number):
+def validate_phone_number(phone_number: str):
     pattern = r"^\+998[1-9]\d\d{3}\d{2}\d{2}$"
     return re.match(pattern, phone_number) is not None
 
 
-def format_phone_number(phone_number):
+def format_phone_number(phone_number: str):
     phone_number = re.sub(r"\D", "", str(phone_number))
     if len(phone_number) not in (9, 12):
         return None

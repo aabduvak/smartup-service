@@ -20,11 +20,11 @@ TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
 CHAT_ID = settings.CHAT_ID
 
 
-def error_handler(message, date):
+def error_handler(message: str, date: datetime):
     send_telegram_message(message)
 
 
-def success_handler(message, date):
+def success_handler(message: str, date: datetime):
     send_telegram_message(message)
 
 

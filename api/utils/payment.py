@@ -16,7 +16,7 @@ PASSWORD = settings.SMARTUP_PASSWORD
 API_BASE = settings.SMARTUP_URL
 
 
-def create_payments(branch_id, date):
+def create_payments(branch_id: str, date: str):
     url = f"https://{API_BASE}/b/es/porting+exp$payment"
 
     xml_data = f"""
@@ -87,7 +87,7 @@ def create_payments(branch_id, date):
     return True
 
 
-def get_payment_list(branch_id, date_of_payment=None):
+def get_payment_list(branch_id: str, date_of_payment=None):
     payment_date = date.today()
     if date_of_payment:
         payment_date = date_of_payment
@@ -97,7 +97,7 @@ def get_payment_list(branch_id, date_of_payment=None):
     return payments_query
 
 
-def get_debt_list(branch_id, currency=None, limit=50, customer_id=None):
+def get_debt_list(branch_id: str, currency=None, limit=50, customer_id=None):
     columns = ["legal_person_id", "currency_name", "total_amount"]
     filter = []
     if currency == "USD":

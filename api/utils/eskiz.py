@@ -28,7 +28,7 @@ def get_token():
 # 	return response
 
 
-def get_balance(token):
+def get_balance(token: str):
     url = f"http://{ESKIZ_URL}/user/get-limit"
 
     headers = {"Authorization": f"Bearer {token}"}
@@ -50,7 +50,7 @@ def get_nickname(token: str) -> str:
     return ESKIZ_DEFAULT_NICK
 
 
-def send_message(phone, message, token, nick):
+def send_message(phone: str, message: str, token: str, nick: str):
     url = f"http://{ESKIZ_URL}/message/sms/send"
 
     data = {

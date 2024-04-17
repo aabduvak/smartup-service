@@ -13,7 +13,7 @@ PASSWORD = settings.SMARTUP_PASSWORD
 API_BASE = settings.SMARTUP_URL
 
 
-def get_customer_from_service(id, branch_id=None):
+def get_customer_from_service(id: str, branch_id=None):
     columns = [
         "person_id",
         "name",
@@ -42,7 +42,7 @@ def get_customer_from_service(id, branch_id=None):
     return customer
 
 
-def create_customers(branch):
+def create_customers(branch: str):
     url = f"https://{API_BASE}/b/es/porting+exp$legal_person"
 
     xml_data = f"""
@@ -174,7 +174,7 @@ def check_customer_data(id: str, user: User, branch_id=None):
     return True
 
 
-def update_customer_phone(customer, user):
+def update_customer_phone(customer, user: User):
     phone = customer[2]
     if not validate_phone_number(phone):
         phone = format_phone_number(phone)
@@ -182,7 +182,7 @@ def update_customer_phone(customer, user):
     user.save()
 
 
-def update_customer_info(customer, user):
+def update_customer_info(customer, user: User):
     user.name = customer[1]
     user.address = customer[4]
 
@@ -191,7 +191,7 @@ def update_customer_info(customer, user):
     user.save()
 
 
-def update_customer_workplace(branch, user: User, workplace_list: list):
+def update_customer_workplace(branch: str, user: User, workplace_list: list[str]):
     user.workplaces.clear()
 
     for workplace_name in workplace_list:

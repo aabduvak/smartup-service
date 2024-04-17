@@ -10,7 +10,7 @@ from api.utils import create_payments, create_deals, send_telegram_message
 BRANCHES = settings.BRANCHES_ID
 
 
-def error_handler(message):
+def error_handler(message: str):
     today = date.today()
 
     users = User.objects.filter(created_at__date=today).count()
@@ -31,7 +31,7 @@ def error_handler(message):
     send_telegram_message(main)
 
 
-def success_handler(status):
+def success_handler(status: str):
     today = date.today()
 
     users = User.objects.filter(created_at__date=today)
