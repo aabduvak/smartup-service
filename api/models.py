@@ -171,3 +171,11 @@ class WorkPlace(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class MessageTemplate(BaseModel):
+    name = models.CharField(max_length=100)
+    message_content = models.TextField()
+
+    def __str__(self):
+        return self.name

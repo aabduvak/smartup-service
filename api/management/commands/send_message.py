@@ -1,6 +1,7 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from datetime import date
+import json
 
 from api.utils import (
     get_payment_list,
@@ -33,20 +34,36 @@ def success_handler(status, data, token):
     send_telegram_message(message)
 
 
-def prepare_message(customer, payment, debt):
+def prepare_message(customer: User, payment: Payment, debt) -> str:
     currency_name = payment.payment_type.currency.name
     if currency_name.lower() == "base sum" or currency_name.lower() == "sum":
         currency_name = "UZS"
 
     payment_date = payment.date_of_payment.strftime("%d/%m/%Y")
-
-    message = f"Hurmatli {customer.name}\nOOO GLAMOUR COSMETICS korxonasiga {payment_date} kuni amalga oshirgan {payment.amount} {currency_name} miqdoridagi to'lovingiz qabul qilindi. "
+    message = MessageTemplate.objects.get(
+        name="CustomerPayment"
+    ).message_content.format(
+        name=customer.name,
+        date=payment_date,
+        amount=payment.amount,
+        currency=currency_name,
+    )
 
     if debt:
         if len(debt["customers"]) == 1:
-            message += f'Mavjud balans {debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]}'
+            template = MessageTemplate.objects.get(name="DebtOneCurrency")
+            if template.is_active:
+                message += " " + template.message_content.format(
+                    debt=f'{debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]}'
+                )
+
         elif len(debt["customers"]) == 2:
-            message += f'Mavjud balans {debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]} va {debt["customers"][1]["amount"]} {debt["customers"][1]["currency"]}'
+            template = MessageTemplate.objects.get(name="DebtTwoCurrencies")
+            if template.is_active:
+                message += " " + template.message_content.format(
+                    firstCurrency=f'{debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]}',
+                    secondCurrency=f'{debt["customers"][1]["amount"]} {debt["customers"][1]["currency"]}',
+                )
 
     return message
 

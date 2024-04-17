@@ -11,6 +11,7 @@ admin.site.register(PaymentType)
 admin.site.register(Currency)
 admin.site.register(Brand)
 admin.site.register(WorkPlace)
+admin.site.register(MessageTemplate)
 
 
 @admin.register(Payment)
