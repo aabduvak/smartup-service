@@ -3,4 +3,5 @@ from telegram.ext import CallbackContext
 
 
 def start(update: Update, context: CallbackContext) -> None:
-    update.message.reply_text(f"Group Chat ID: {update.message.chat_id}")
+    message = f"Привет {update.effective_user.full_name}\nID этого чата: {update.message.chat_id}"
+    update.message.reply_text(message)

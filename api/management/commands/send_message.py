@@ -11,6 +11,7 @@ from api.utils import (
 )
 from api.models import *
 from api.utils.eskiz import get_token, get_balance, send_message, get_nickname
+from api.utils.telegram import send_telegram_message
 
 BRANCHES_ID = settings.BRANCHES_ID
 STATUS_LIST = ["DELIVRD", "TRANSMTD", "WAITING"]
@@ -69,6 +70,11 @@ def prepare_message(customer: User, payment: Payment, debt) -> str:
 
 
 def send_messages():
+    sms_service = ServiceConfiguration.objects.get(name="sms_service")
+
+    if not sms_service.is_active:
+        return
+
     token = get_token()
     if token is None:
         return  # Invalid token
@@ -87,18 +93,18 @@ def send_messages():
                 data["disabled"] += 1
                 continue
 
-            # if not customer.phone:
-            #    data["invalid"] += 1
-            #    continue
+            if not customer.phone:
+                data["invalid"] += 1
+                continue
 
             debt = get_debt_list(branch_id=branch, customer_id=customer.smartup_id)
             message = prepare_message(customer, payment, debt)
 
-            # state = send_message(customer.phone[1:], message, token, nick)
-            # if state and state["status"].upper() in STATUS_LIST:
-            #    data["success"] += 1
-            # else:
-            #    data["error"] += 1
+            state = send_message(customer.phone[1:], message, token, nick)
+            if state and state["status"].upper() in STATUS_LIST:
+                data["success"] += 1
+            else:
+                data["error"] += 1
 
     success_handler("Отправлено сообщение клиентам, у которых есть оплата", data, token)
 

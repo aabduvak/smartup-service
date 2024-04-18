@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.conf import settings
 from datetime import datetime
 
-
+from api.models import ServiceConfiguration
 from api.utils import (
     create_currency,
     create_payment_type,
@@ -28,43 +28,51 @@ def success_handler(message: str, date: datetime):
     send_telegram_message(message)
 
 
+def fetch_all_data():
+    service = ServiceConfiguration.objects.get(name="sync_daily_data")
+    if not service.is_active:
+        return
+
+    date = datetime.now().strftime("%d.%m.%Y")
+
+    if not create_currency():
+        error_handler("❌ Ошибка при создании валюты", date)
+        return
+
+    if not create_payment_type():
+        error_handler("❌ Ошибка при создании типа платежа", date)
+        return
+
+    if not create_places():
+        error_handler("❌ Ошибка при создании мест.", date)
+        return
+
+    for branch in BRANCHES:
+        if not create_workplaces(branch):
+            error_handler("❌ Ошибка при создании рабочих мест", date)
+            return
+
+        if not create_products(branch):
+            error_handler("❌ Ошибка при создании товаров", date)
+            return
+
+        if not create_customers(branch):
+            error_handler("❌ Ошибка при создании клиентов", date)
+            return
+
+        if not create_payments(branch, date):
+            error_handler("❌ Ошибка при создании платежей", date)
+            return
+
+        if not create_deals(branch, date):
+            error_handler("❌ Ошибка при создании сделок", date)
+            return
+
+    success_handler("✅ Все данные успешно перенесены", date)
+
+
 class Command(BaseCommand):
-    help = "Send message to customers who has payment for today"
+    help = "Fetch all data from Smartup API"
 
     def handle(self, *args, **options):
-        date = datetime.now().strftime("%d.%m.%Y")
-
-        if not create_currency():
-            error_handler("❌ Error while creating currency", date)
-            return
-
-        if not create_payment_type():
-            error_handler("❌ Error while creating payment type", date)
-            return
-
-        if not create_places():
-            error_handler("❌ Error while creating places", date)
-            return
-
-        for branch in BRANCHES:
-            if not create_workplaces(branch):
-                error_handler("❌ Error while creating workplaces", date)
-                return
-
-            if not create_products(branch):
-                error_handler("❌ Error while creating products", date)
-                return
-
-            if not create_customers(branch):
-                error_handler("❌ Error while creating customers", date)
-                return
-
-            if not create_payments(branch, date):
-                error_handler("❌ Error while creating payments", date)
-                return
-
-            if not create_deals(branch, date):
-                error_handler("❌ Error while creating deals", date)
-                return
-
-        success_handler("✅ All data migrated successfully", date)
+        fetch_all_data()

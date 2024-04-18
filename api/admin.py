@@ -12,6 +12,7 @@ admin.site.register(Currency)
 admin.site.register(Brand)
 admin.site.register(WorkPlace)
 admin.site.register(MessageTemplate)
+admin.site.register(ServiceConfiguration)
 
 
 @admin.register(Payment)

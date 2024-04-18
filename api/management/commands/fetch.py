@@ -2,7 +2,7 @@ from django.core.management.base import BaseCommand
 from django.db.models import Sum
 from django.conf import settings
 from datetime import datetime, date
-from api.models import User, Product, Payment, Deal
+from api.models import User, Product, Payment, Deal, ServiceConfiguration
 import requests
 
 from api.utils import create_payments, create_deals, send_telegram_message
@@ -93,20 +93,28 @@ def success_handler(status: str):
     send_telegram_message(message)
 
 
+def fetch_daily_data():
+    service = ServiceConfiguration.objects.get(name="sync_daily_data")
+    if not service.is_active:
+        return
+
+    date = datetime.now().strftime("%d.%m.%Y")
+
+    for branch in BRANCHES:
+
+        if not create_payments(branch, date):
+            error_handler("Ошибка при создании платежей")
+            return
+
+        if not create_deals(branch, date):
+            error_handler("Ошибка при создании сделок")
+            return
+
+    success_handler("Данные перенесены успешно")
+
+
 class Command(BaseCommand):
     help = "Send message to customers who has payment for today"
 
     def handle(self, *args, **options):
-        date = datetime.now().strftime("%d.%m.%Y")
-
-        for branch in BRANCHES:
-
-            if not create_payments(branch, date):
-                error_handler("Ошибка при создании платежей")
-                return
-
-            if not create_deals(branch, date):
-                error_handler("Ошибка при создании сделок")
-                return
-
-        success_handler("Данные перенесены успешно")
+        fetch_daily_data()
