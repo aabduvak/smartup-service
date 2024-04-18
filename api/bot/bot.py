@@ -7,6 +7,7 @@ from api.bot.commands.workplaces import workplaces
 from api.bot.commands.sms import sms_balance
 from api.bot.commands.service_config import sms_service
 from api.bot.commands.callback_query import callback_handler
+from api.bot.commands.debt import debt_list
 
 TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
 CHAT_ID = settings.CHAT_ID
@@ -28,6 +29,7 @@ def main():
     dp.add_handler(CommandHandler("workplaces", workplaces))
     dp.add_handler(CommandHandler("balance", sms_balance))
     dp.add_handler(CommandHandler("service", sms_service))
+    dp.add_handler(CommandHandler("debt_list", debt_list))
     dp.add_handler(CallbackQueryHandler(callback_handler))
 
     updater.start_polling()

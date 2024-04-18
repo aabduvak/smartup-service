@@ -1,7 +1,6 @@
 from django.core.management.base import BaseCommand
 from django.conf import settings
 from api.bot.bot import main
-import asyncio
 
 TELEGRAM_TOKEN = settings.TELEGRAM_TOKEN
 
