@@ -12,6 +12,7 @@ from .service_config import get_service_keyboard
 
 BRANCHES_ID = settings.BRANCHES_ID
 
+
 def get_current_time() -> str:
     current_time_utc = timezone.now()
     tashkent_timezone = pytz.timezone("Asia/Tashkent")
@@ -57,21 +58,25 @@ def callback_handler(update: Update, context: CallbackContext) -> None:
 
         query.answer(text="✅ Служба SMS успешно обновлена")
         return
-    
+
     elif data[0] == "currency":
         time = get_current_time()
         for branch in BRANCHES_ID:
             debt_list = get_debt_list(branch, time, data[1])
-            message = 'Список клиентов, у которых есть задолженность\n\n'
-            
-            for i in range(0, len(debt_list['customers'])):
-                amount = "{:,.2f}".format(debt_list["customers"][i]["amount"]).replace(",", " ")
+            message = "Список клиентов, у которых есть задолженность\n\n"
+
+            for i in range(0, len(debt_list["customers"])):
+                amount = "{:,.2f}".format(debt_list["customers"][i]["amount"]).replace(
+                    ",", " "
+                )
                 message += f'{i + 1}. {debt_list["customers"][i]["name"]} --> {amount} {data[1]}\n'
-            
-            message += f'\nОбщий долг (50 чел.): ' + "{:,.2f}".format(debt_list["total_debt"]).replace(",", " ") + f" {data[1]}"
+
+            message += (
+                f"\nОбщий долг (50 чел.): "
+                + "{:,.2f}".format(debt_list["total_debt"]).replace(",", " ")
+                + f" {data[1]}"
+            )
             send_telegram_message(message)
         query.answer("✅ Список клиентов успешно отправлен в чат")
         query.message.delete()
-        return    
-            
-        
+        return

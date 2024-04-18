@@ -83,11 +83,19 @@ def success_handler(status: str):
         f"Финансовый отчет 📊\n\n"
         + f"📅  Дата: {today.strftime('%d/%m/%Y')}\n\n"
         + f"Валюта: USD\n"
-        + f"Сумма платежей: " + "{:,.2f}".format(usd_payments).replace(",", " ") + "\n"
-        + f"Сумма сделок: " + "{:,.2f}".format(usd_deals).replace(",", " ") + "\n\n"
+        + f"Сумма платежей: "
+        + "{:,.2f}".format(usd_payments).replace(",", " ")
+        + "\n"
+        + f"Сумма сделок: "
+        + "{:,.2f}".format(usd_deals).replace(",", " ")
+        + "\n\n"
         + f"Валюта: UZS\n"
-        + f"Сумма платежей: " + "{:,.2f}".format(uzs_payments).replace(",", " ") + "\n"
-        + f"Сумма сделок: " + "{:,.2f}".format(uzs_deals).replace(",", " ") + "\n\n"
+        + f"Сумма платежей: "
+        + "{:,.2f}".format(uzs_payments).replace(",", " ")
+        + "\n"
+        + f"Сумма сделок: "
+        + "{:,.2f}".format(uzs_deals).replace(",", " ")
+        + "\n\n"
         + f"Статус:\n{status} ✅"
     )
     send_telegram_message(message)

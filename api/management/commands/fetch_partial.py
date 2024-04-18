@@ -18,6 +18,7 @@ CHAT_ID = settings.CHAT_ID
 def error_handler(message: str, date: datetime):
     send_telegram_message(message)
 
+
 def fetch_partial_data():
     service = ServiceConfiguration.objects.get(name="sync_daily_data")
     if not service.is_active:
@@ -36,6 +37,7 @@ def fetch_partial_data():
     if not create_places():
         error_handler("❌ Ошибка при создании мест.", date)
         return
+
 
 class Command(BaseCommand):
     help = "Fetch partial data from Smartup API"
