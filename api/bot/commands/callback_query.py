@@ -69,10 +69,10 @@ def callback_handler(update: Update, context: CallbackContext) -> None:
                 amount = "{:,.2f}".format(debt_list["customers"][i]["amount"]).replace(
                     ",", " "
                 )
-                message += f'{i + 1}. {debt_list["customers"][i]["name"]} --> {amount} {data[1]}\n'
+                message += f'{i + 1}. {debt_list["customers"][i]["name"]} --> {amount} {data[1]}\n\n'
 
             message += (
-                f"\nОбщий долг (50 чел.): "
+                f"Общий долг (50 чел.): "
                 + "{:,.2f}".format(debt_list["total_debt"]).replace(",", " ")
                 + f" {data[1]}"
             )
