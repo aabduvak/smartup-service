@@ -3,16 +3,273 @@ from django.contrib import admin
 # Register your models here.
 from api.models import *
 
-admin.site.register(Branch)
-admin.site.register(District)
-admin.site.register(Region)
-admin.site.register(City)
-admin.site.register(PaymentType)
-admin.site.register(Currency)
-admin.site.register(Brand)
-admin.site.register(WorkPlace)
-admin.site.register(MessageTemplate)
-admin.site.register(ServiceConfiguration)
+
+@admin.register(Branch)
+class BranchAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "smartup_id",
+        "name",
+        "created_at",
+    )
+
+    list_filter = ("is_active",)
+
+    sortable_by = (
+        "smartup_id",
+        "name",
+        "created_at",
+    )
+
+    search_fields = ("id", "name", "smartup_id")
+
+
+@admin.register(Region)
+class RegionAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "smartup_id",
+        "name",
+        "created_at",
+    )
+
+    list_filter = ("is_active",)
+
+    sortable_by = (
+        "smartup_id",
+        "name",
+        "created_at",
+    )
+
+    search_fields = ("id", "name", "smartup_id")
+
+
+@admin.register(City)
+class CityAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "smartup_id",
+        "name",
+        "region",
+        "created_at",
+    )
+
+    list_filter = (
+        "region",
+        "is_active",
+    )
+
+    sortable_by = (
+        "smartup_id",
+        "name",
+        "created_at",
+        "region",
+    )
+
+    search_fields = ("id", "name", "smartup_id")
+
+
+@admin.register(District)
+class DistrictAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "smartup_id",
+        "name",
+        "city",
+        "created_at",
+    )
+
+    list_filter = (
+        "city",
+        "is_active",
+    )
+
+    sortable_by = (
+        "smartup_id",
+        "name",
+        "created_at",
+        "city",
+    )
+
+    search_fields = ("id", "name", "smartup_id")
+
+
+@admin.register(PaymentType)
+class PaymentTypeAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "smartup_id",
+        "name",
+        "currency",
+        "created_at",
+    )
+
+    list_filter = (
+        "currency",
+        "is_active",
+    )
+
+    sortable_by = (
+        "smartup_id",
+        "name",
+        "currency",
+        "created_at",
+    )
+
+    search_fields = ("id", "name", "smartup_id")
+
+
+@admin.register(Currency)
+class CurrencyAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "name",
+        "created_at",
+    )
+
+    list_filter = ("is_active",)
+
+    sortable_by = (
+        "name",
+        "created_at",
+    )
+
+    search_fields = (
+        "id",
+        "name",
+    )
+
+
+@admin.register(Brand)
+class BrandAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "smartup_id",
+        "name",
+        "created_at",
+    )
+
+    list_filter = ("is_active",)
+
+    sortable_by = (
+        "smartup_id",
+        "name",
+        "created_at",
+    )
+
+    search_fields = ("id", "name", "smartup_id")
+
+
+@admin.register(WorkPlace)
+class WorkplaceAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "id",
+        "smartup_id",
+        "name",
+        "code",
+        "created_at",
+    )
+
+    filter_horizontal = ("customers",)
+
+    list_filter = ("is_active",)
+
+    sortable_by = (
+        "smartup_id",
+        "name",
+        "code",
+        "created_at",
+    )
+
+    search_fields = ("id", "name", "smartup_id", "code")
+
+
+@admin.register(MessageTemplate)
+class MessageTemplateAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "name",
+        "created_at",
+    )
+
+    list_filter = ("is_active",)
+
+    sortable_by = (
+        "name",
+        "created_at",
+    )
+
+    search_fields = ("name",)
+
+
+@admin.register(ServiceConfiguration)
+class ServiceConfigurationAdmin(admin.ModelAdmin):
+    readonly_fields = (
+        "id",
+        "created_at",
+        "updated_at",
+    )
+    list_display = (
+        "name",
+        "description",
+        "created_at",
+    )
+
+    list_filter = ("is_active",)
+
+    sortable_by = (
+        "name",
+        "description",
+        "created_at",
+    )
+
+    search_fields = (
+        "name",
+        "description",
+    )
 
 
 @admin.register(Payment)
