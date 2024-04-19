@@ -34,6 +34,7 @@ def fetch_partial_data():
         error_handler("❌ Ошибка при создании типа платежа", date)
         return
 
+
 class Command(BaseCommand):
     help = "Fetch partial data from Smartup API"
 

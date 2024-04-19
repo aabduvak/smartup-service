@@ -1,9 +1,11 @@
 from .get_data import get_data
 
 
-def get_debt_list(branch_id: str, date: str, currency="USD", limit=50) -> dict:
+def get_debt_list(branch_id: str, currency="USD", limit=50) -> dict:
     columns = [
+        "legal_person_id",
         "legal_person_name",
+        "currency_name",
         "debit_amount",
     ]
 
@@ -30,8 +32,10 @@ def get_debt_list(branch_id: str, date: str, currency="USD", limit=50) -> dict:
 
     for debt_info in response["data"]:
         item = {
-            "name": debt_info[0],
-            "amount": float(debt_info[1]),
+            "id": debt_info[0],
+            "name": debt_info[1],
+            "currency": debt_info[2],
+            "amount": float(debt_info[3]),
         }
 
         data["total_debt"] += item["amount"]

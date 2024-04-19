@@ -1,3 +1,4 @@
+import os
 from telegram import Update
 from telegram.ext import CallbackContext
 
@@ -7,10 +8,13 @@ import pytz
 
 from api.utils import toggle_workplace, toggle_service, send_telegram_message
 from api.utils.debt import get_debt_list
+from api.utils.excel import create_debt_list_file
 from .workplaces import get_workplaces_keyboard
 from .service_config import get_service_keyboard
+from .debt import get_export_keyboard
 
 BRANCHES_ID = settings.BRANCHES_ID
+CHAT_ID = settings.CHAT_ID
 
 
 def get_current_time() -> str:
@@ -61,22 +65,45 @@ def callback_handler(update: Update, context: CallbackContext) -> None:
 
     elif data[0] == "currency":
         time = get_current_time()
+
+        new_markup = get_export_keyboard(data[1])
+        query.edit_message_text(
+            text="Выберите один из вариантов ниже\n",
+            reply_markup=new_markup,
+        )
+
+        return
+
+    elif data[0] == "export":
         for branch in BRANCHES_ID:
-            debt_list = get_debt_list(branch, time, data[1])
-            message = "Список клиентов, у которых есть задолженность\n\n"
+            if data[1] == "false":
+                debt_list = get_debt_list(branch, data[3])
+                message = "Список клиентов, у которых есть задолженность\n\n"
 
-            for i in range(0, len(debt_list["customers"])):
-                amount = "{:,.2f}".format(debt_list["customers"][i]["amount"]).replace(
-                    ",", " "
+                for i in range(0, len(debt_list["customers"])):
+                    amount = "{:,.2f}".format(
+                        debt_list["customers"][i]["amount"]
+                    ).replace(",", " ")
+                    message += f'{i + 1}. {debt_list["customers"][i]["name"]} --> {amount} {data[3]}\n\n'
+
+                message += (
+                    f"Общий долг (50 чел.): "
+                    + "{:,.2f}".format(debt_list["total_debt"]).replace(",", " ")
+                    + f" {data[3]}"
                 )
-                message += f'{i + 1}. {debt_list["customers"][i]["name"]} --> {amount} {data[1]}\n\n'
+                send_telegram_message(message)
+            else:
+                filename = "DebtList.xlsx"
+                file_path = create_debt_list_file(
+                    currency=data[3], filename=filename, branch=branch
+                )
 
-            message += (
-                f"Общий долг (50 чел.): "
-                + "{:,.2f}".format(debt_list["total_debt"]).replace(",", " ")
-                + f" {data[1]}"
-            )
-            send_telegram_message(message)
+                context.bot.send_document(
+                    chat_id=CHAT_ID,
+                    document=open(file_path, "rb"),
+                    caption="Список должников (топ-1000)",
+                )
+                os.remove(file_path)
+
         query.answer("✅ Список клиентов успешно отправлен в чат")
         query.message.delete()
-        return

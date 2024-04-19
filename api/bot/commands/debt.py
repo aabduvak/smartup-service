@@ -16,6 +16,25 @@ def get_currency_keyboard():
     return InlineKeyboardMarkup(keyboard)
 
 
+def get_export_keyboard(currency):
+    keyboard = [
+        [
+            InlineKeyboardButton(
+                text="Получить полный список (xlsx)",
+                callback_data=f"export:true:currency:{currency}",
+            )
+        ],
+        [
+            InlineKeyboardButton(
+                text="Получить список топ-50 должников",
+                callback_data=f"export:false:currency:{currency}",
+            )
+        ],
+    ]
+
+    return InlineKeyboardMarkup(keyboard)
+
+
 def debt_list(update: Update, context: CallbackContext) -> None:
     if not is_valid_chat(update):
         return
@@ -23,6 +42,6 @@ def debt_list(update: Update, context: CallbackContext) -> None:
     reply_markup = get_currency_keyboard()
 
     update.message.reply_text(
-        text="Выберите валюту для отображения списка долгов (50 чел.)",
+        text="Выберите валюту для отображения списка долгов",
         reply_markup=reply_markup,
     )
