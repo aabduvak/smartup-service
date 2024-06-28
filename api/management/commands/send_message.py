@@ -75,10 +75,6 @@ def send_messages():
         return
 
     token = get_token()
-    if token is None:
-        return  # Invalid token
-
-    token = token["data"]["token"]
     nick = get_nickname(token)
 
     data = {"success": 0, "error": 0, "invalid": 0, "disabled": 0}

@@ -1,4 +1,6 @@
 import uuid
+from datetime import datetime, timedelta
+from django.utils import timezone
 from django.db import models
 
 
@@ -188,3 +190,18 @@ class ServiceConfiguration(BaseModel):
 
     def __str__(self):
         return self.name
+
+
+class EskizServiceConfig(BaseModel):
+    id = models.UUIDField(unique=True, default=uuid.uuid4, primary_key=True)
+    token = models.TextField()
+    expires_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self) -> str:
+        return self.token
+
+    def refresh_token(self, token: str):
+        self.token = token
+        self.created_at = timezone.now()
+        self.expires_at = timezone.now() + timedelta(days=29)
+        self.save()

@@ -1,5 +1,10 @@
 import requests
+from datetime import datetime, timedelta
+from django.utils import timezone
 from django.conf import settings
+
+from api.utils.telegram import send_telegram_message
+from api.models import EskizServiceConfig
 
 ESKIZ_EMAIL = settings.ESKIZ_EMAIL
 ESKIZ_PASSWORD = settings.ESKIZ_PASSWORD
@@ -7,29 +12,36 @@ ESKIZ_URL = settings.ESKIZ_URL
 ESKIZ_DEFAULT_NICK = settings.ESKIZ_DEFAULT_NICK
 
 
-def get_token():
-    url = f"http://{ESKIZ_URL}/auth/login"
+def _create_token() -> str:
+    url = f"https://{ESKIZ_URL}/auth/login"
     data = {"email": ESKIZ_EMAIL, "password": ESKIZ_PASSWORD}
 
     response = requests.post(url=url, data=data)
     if response.status_code == 200:
-        return response.json()
-    return None
+        return response.json()["data"]["token"]
+
+    send_telegram_message(response.text)
+    raise NotImplementedError(response.text)
 
 
-# Removed from provider API
-# def delete_token(token):
-# 	url = f'http://{ESKIZ_URL}/auth/invalidate'
+def get_token() -> str:
+    eskiz = EskizServiceConfig.objects.first()
+    now = timezone.now()
 
-# 	headers = {
-# 		"Authorization": f"Bearer {token}"
-# 	}
-# 	response = requests.delete(url=url, headers=headers)
-# 	return response
+    if not eskiz or not eskiz.token:
+        eskiz = EskizServiceConfig.objects.create(
+            token=_create_token(), expires_at=now + timedelta(days=29)
+        )
+
+    if eskiz.expires_at <= now:
+        token = _create_token()
+        eskiz.refresh_token(token)
+
+    return eskiz.token
 
 
 def get_balance(token: str):
-    url = f"http://{ESKIZ_URL}/user/get-limit"
+    url = f"https://{ESKIZ_URL}/user/get-limit"
 
     headers = {"Authorization": f"Bearer {token}"}
     response = requests.get(url=url, headers=headers)
@@ -37,7 +49,7 @@ def get_balance(token: str):
 
 
 def get_nickname(token: str) -> str:
-    url = f"http://{ESKIZ_URL}/nick/me"
+    url = f"https://{ESKIZ_URL}/nick/me"
 
     headers = {"Authorization": f"Bearer {token}"}
     response = requests.get(url=url, headers=headers)
@@ -51,7 +63,7 @@ def get_nickname(token: str) -> str:
 
 
 def send_message(phone: str, message: str, token: str, nick: str):
-    url = f"http://{ESKIZ_URL}/message/sms/send"
+    url = f"https://{ESKIZ_URL}/message/sms/send"
 
     data = {
         "mobile_phone": phone,
