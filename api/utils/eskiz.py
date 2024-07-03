@@ -20,7 +20,19 @@ def _create_token() -> str:
     if response.status_code == 200:
         return response.json()["data"]["token"]
 
-    send_telegram_message(response.text)
+    send_telegram_message(f"❌ Error while creating token:\n{response.text}")
+    raise NotImplementedError(response.text)
+
+
+def _refresh_token(token: str) -> str:
+    url = f"https://{ESKIZ_URL}/auth/refresh"
+    headers = {"Authorization": f"Bearer {token}"}
+
+    response = requests.patch(url=url, headers=headers)
+    if response.status_code == 200:
+        return response.json()["data"]["token"]
+
+    send_telegram_message(f"❌ Error while refreshing token:\n{response.text}")
     raise NotImplementedError(response.text)
 
 
@@ -34,7 +46,7 @@ def get_token() -> str:
         )
 
     if eskiz.expires_at <= now:
-        token = _create_token()
+        token = _refresh_token(eskiz.token)
         eskiz.refresh_token(token)
 
     return eskiz.token

@@ -48,23 +48,6 @@ def prepare_message(customer: User, payment: Payment, debt) -> str:
         amount=payment.amount,
         currency=currency_name,
     )
-
-    if debt:
-        if len(debt["customers"]) == 1:
-            template = MessageTemplate.objects.get(name="DebtOneCurrency")
-            if template.is_active:
-                message += " " + template.message_content.format(
-                    debt=f'{debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]}'
-                )
-
-        elif len(debt["customers"]) == 2:
-            template = MessageTemplate.objects.get(name="DebtTwoCurrencies")
-            if template.is_active:
-                message += " " + template.message_content.format(
-                    firstCurrency=f'{debt["customers"][0]["amount"]} {debt["customers"][0]["currency"]}',
-                    secondCurrency=f'{debt["customers"][1]["amount"]} {debt["customers"][1]["currency"]}',
-                )
-
     return message
 
 
